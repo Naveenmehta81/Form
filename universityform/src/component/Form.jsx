@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import "./Form.css";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
+// import PhoneInput from "react-phone-input-2";
+// import "react-phone-input-2/lib/style.css";
 import Countries from "./Countries"; // country data
 import courses from "./Courses"; // courses data
-import PhoneData from './Phonedata'  ;  // phonedata 
+import PhoneData from "./Phonedata"; // phonedata
 
 const Form = () => {
   const [formData, setFormData] = useState({
@@ -16,46 +16,61 @@ const Form = () => {
     address: "",
     gender: "",
     country: "",
-    dialcode : "+91", 
+    dialcode: "+91",
     phone: "",
     pin: " ",
     courses: "",
   });
 
- 
-
-  const [valid, setValid] = useState(true);
+  // const [valid, setValid] = useState(true);
 
   const handleInput = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-
-
-  const handleDialCode = (e) => {
-     setFormData({ ...formData, dialCode: e.target.value });
+  const handleDialCode = (e) => {  // dila code ka change 
+    setFormData({ ...formData, 
+       dialCode: e.target.value });
   };
 
-  const handlePhoneNumber = (value) => {
-    setFormData({ ...formData, phone: value });
-    setValid(validatePhoneNumber(value));
-  };
+ const handlephoneinput = (e) =>{    // phone number ka change 
+     const value = e.target.value;
 
-  const validatePhoneNumber = (phone) => {
-    return phone && phone.length >= 10;
-  };
+        if(value.startsWith('+')){
+           
+           const matchedcountry = PhoneData .slice().sort((a , b ) => b.dial_code.length - a.dial_code.length)
+           .find(item => value.startsWith(item.dial_code)) ;
+
+
+        if(matchedcountry ){
+          setFormData((prev) =>({
+            ...prev ,
+            dialcode : matchedcountry.dial_code , 
+            phone : value.replace(matchedcountry.dial_code , ' ').trim()
+          })) ; 
+        }
+       return ;
+      }
+ } ;
+
+
+
+
+  // const handlePhoneNumber = (value) => {
+  //   setFormData({ ...formData, phone: value });
+  //   setValid(validatePhoneNumber(value));
+  // };
+
+  // const validatePhoneNumber = (phone) => {
+  //   return phone && phone.length >= 10;
+  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form Data Submitted:", formData);
     alert("Form Submitted Successfully!");
   };
-
-
-
-
-
 
   return (
     <div className="form-container">
@@ -146,7 +161,7 @@ const Form = () => {
                     onChange={handleInput}
                   />{" "}
                   Female
-                  <input  
+                  <input
                     type="radio"
                     name="gender"
                     value="other"
@@ -158,46 +173,39 @@ const Form = () => {
               </div>
             </div>
 
-
-            <div className="form-row">
-                <div className="form-group">
-                  <label>Phone number</label>
-                  <select
-                   
-                   value={PhoneData.dial_code}
-                   id="dialCode"
-                   name="dialCode"
-                   value = {formData.dialcode}    
-                   onChange={handleDialCode}
-                   required
-                  >
-                   {
-                    PhoneData.map((item , index) =>(
-                          <option key={index} value={item.dial_code }  >
-                            {item.flag} {item.name}
-
-                          </option>
-                    ))
-                   }
-
-                  </select>
-                  <input 
-                     type="number" 
-                     name="phone"
-                     placeholder="Mobile Number"
+            <div className="form-row-phone">
+              <div className="form-group-phone">
+                <label>Phone number</label>
+                <select
                 
-                     value={formData.phone}
-                     onChange={handleInput}
-                     required
-                   />
+                  id="dialCode"
+                  name="dialCode" 
+                  value={formData.dialcode}
+                  onChange={handleDialCode}
+                  required
+                >
+                  {PhoneData.map((item, index) => (
+                    <option key={index} value={item.dial_code}>
+                      {item.flag}  {item.dial_code}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                   
-                </div>
+              <div className="form-input-number"> 
+                <input
+                  type="text"
+                  name="phone"
+                  placeholder="Mobile Number"
+                  value={formData.phone}
+                  onChange={handlephoneinput}
+                  required
+                />
+              </div>
             </div>
 
-
-            <div className="form-row">
-              <div className="form-group">
+             <div className="form-row"> 
+              {/* <div className="form-group">
                 <label>Phone Number:</label>
                 <PhoneInput
                   country={"us"}
@@ -209,9 +217,7 @@ const Form = () => {
                   }}
                 />
                 {!valid && <span className="error">Invalid Phone Number</span>}
-              </div>
-
-              
+              </div>  */}
 
               <div className="form-group">
                 <label htmlFor="country">Country:</label>
@@ -288,4 +294,4 @@ const Form = () => {
   );
 };
 
-export default Form ;
+export default Form;

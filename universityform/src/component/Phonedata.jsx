@@ -1,4 +1,4 @@
-const PhoneData = [
+const  PhoneData = [
   { name: "Afghanistan", code: "AF", dial_code: "+93", flag: "🇦🇫" },
   { name: "Albania", code: "AL", dial_code: "+355", flag: "🇦🇱" },
   { name: "Algeria", code: "DZ", dial_code: "+213", flag: "🇩🇿" },
