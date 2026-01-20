@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import "./Form.css";
-// import PhoneInput from "react-phone-input-2";
-// import "react-phone-input-2/lib/style.css";
+
 import Countries from "./Countries"; // country data
 import courses from "./Courses"; // courses data
 import PhoneData from "./Phonedata"; // phonedata
 
+console.log(Countries);
 const Form = () => {
   const [formData, setFormData] = useState({
     firstname: "",
@@ -17,54 +17,122 @@ const Form = () => {
     gender: "",
     country: "",
     dialcode: "+91",
-    phone: "",
-    pin: " ",
+    // code: "IN",
+    phone: "+91",
+    pin: "",
     courses: "",
+    marksheet10: false,
+    marksheet12: false,
+    BCA: false,
+    MCA: false,
+    about: "",
   });
 
-  // const [valid, setValid] = useState(true);
+  const [emailerror, setEmailerror] = useState("");
+  const [iscountropen, setiscountryopen] = useState(false);
+  const [isCoursesOpen, setIsCoursesOpen] = useState(false);
 
   const handleInput = (e) => {
     const { name, value } = e.target;
+
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleDialCode = (e) => {  // dila code ka change 
-    setFormData({ ...formData, 
-       dialCode: e.target.value });
+  const handleFullname = (e) => {
+    const { name, value } = e.target;
+    const setinput = value.replace(/[^a-zA-Z]/g, "");
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: setinput,
+    }));
   };
 
- const handlephoneinput = (e) =>{    // phone number ka change 
-     const value = e.target.value;
+  const handleFatherInput = (e) => {
+    const { name, value } = e.target;
+    const setinputfather = value.replace(/[^a-zA-Z ]/g, "");
 
-        if(value.startsWith('+')){
-           
-           const matchedcountry = PhoneData .slice().sort((a , b ) => b.dial_code.length - a.dial_code.length)
-           .find(item => value.startsWith(item.dial_code)) ;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: setinputfather,
+    }));
+  };
 
+  const handlvalidation = (e) => {
+    const email = e.target.value;
+    const expression = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;   
 
-        if(matchedcountry ){
-          setFormData((prev) =>({
-            ...prev ,
-            dialcode : matchedcountry.dial_code , 
-            phone : value.replace(matchedcountry.dial_code , ' ').trim()
-          })) ; 
-        }
-       return ;
-      }
- } ;
+    if (email && !expression.test(email)) {
+      setEmailerror("please enter valid email");
+    } else {
+      setEmailerror("");
+    }
+  };
 
+  const handleAboutInput = (e) => {
+    const { name, value } = e.target;
 
+    const words = value
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word !== "");
 
+    if (words.length <= 200 || value.length < formData.about.length) {
+      setFormData({ ...formData, [name]: value });
+    } else {
+      alert("Word limit exceeded! Maximum 200 words allowed.");
+    }
+  };
 
-  // const handlePhoneNumber = (value) => {
-  //   setFormData({ ...formData, phone: value });
-  //   setValid(validatePhoneNumber(value));
-  // };
+  const getWordCount = () => {
+    if (!formData.about) return 0;
+    return formData.about
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word !== "").length;
+  };
 
-  // const validatePhoneNumber = (phone) => {
-  //   return phone && phone.length >= 10;
-  // };
+  const handelcheckbox = (e) => {
+    const { name, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
+  const sortPhonedata = [...PhoneData].sort(
+    (a, b) => b.dial_code.length - a.dial_code.length, // soting longest to shortest
+  );
+
+  const handleDialCode = (e) => {
+    const newcode = e.target.value;
+    const oldcode = formData.dialcode;
+    let currentphone = formData.phone;
+
+    if (currentphone.startsWith(oldcode)) {
+      currentphone = currentphone.slice(oldcode.length).trim();
+    }
+
+    setFormData({
+      ...formData,
+      dialcode: newcode,
+      phone: newcode + currentphone,
+    });
+  };
+
+  const handlephoneinput = (e) => {
+    // phone number ka change
+    const inputvalue = e.target.value;
+    const matchcontry = sortPhonedata.find((item) =>
+      inputvalue.startsWith(item.dial_code),
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      phone: inputvalue,
+      dialcode: matchcontry ? matchcontry.dial_code : prev.dialcode,
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -77,7 +145,7 @@ const Form = () => {
       <div className="form-box">
         <h1>College Form</h1>
         <div className="from-data">
-          <h2>Fill this detials</h2>
+          <h2>Fill this details</h2>
 
           <form className="from-field" onSubmit={handleSubmit}>
             <div className="form-row">
@@ -89,7 +157,7 @@ const Form = () => {
                   required
                   name="firstname"
                   value={formData.firstname}
-                  onChange={handleInput}
+                  onChange={handleFullname}
                 />
               </div>
               <div className="form-group">
@@ -100,7 +168,7 @@ const Form = () => {
                   required
                   name="lastname"
                   value={formData.lastname}
-                  onChange={handleInput}
+                  onChange={handleFullname}
                 />
               </div>
             </div>
@@ -112,7 +180,7 @@ const Form = () => {
                   placeholder="enter father name"
                   name="fathername"
                   value={formData.fathername}
-                  onChange={handleInput}
+                  onChange={handleFatherInput}
                   required
                 />
               </div>
@@ -127,7 +195,14 @@ const Form = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInput}
+                onBlur={handlvalidation}
+                style={{ borderColor: emailerror ? "red" : "" }}
               />
+              {emailerror && (
+                <span style={{ color: "red", fontSize: "12px" }}>
+                  {emailerror}
+                </span>
+              )}
             </div>
 
             <div className="form-row">
@@ -177,22 +252,21 @@ const Form = () => {
               <div className="form-group-phone">
                 <label>Phone number</label>
                 <select
-                
-                  id="dialCode"
-                  name="dialCode" 
+                  id="dialcode"
+                  name="dialcode"
                   value={formData.dialcode}
                   onChange={handleDialCode}
                   required
                 >
-                  {PhoneData.map((item, index) => (
-                    <option key={index} value={item.dial_code}>
-                      {item.flag}  {item.dial_code}
+                  {PhoneData.map((item) => (
+                    <option key={item.code} value={item.dial_code}>
+                      {item.flag} {item.dial_code}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div className="form-input-number"> 
+              <div className="form-input-number">
                 <input
                   type="text"
                   name="phone"
@@ -204,37 +278,41 @@ const Form = () => {
               </div>
             </div>
 
-             <div className="form-row"> 
-              {/* <div className="form-group">
-                <label>Phone Number:</label>
-                <PhoneInput
-                  country={"us"}
-                  value={formData.phone}
-                  onChange={handlePhoneNumber}
-                  inputProps={{
-                    name: "phone",
-                    required: true,
-                  }}
-                />
-                {!valid && <span className="error">Invalid Phone Number</span>}
-              </div>  */}
-
+            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="country">Country:</label>
-                <select
-                  id="country"
-                  name="country"
-                  value={formData.country}
-                  onChange={handleInput}
-                  required
-                >
-                  <option value="">Select Country</option>
-                  {Countries.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
+
+                <div className="custom-select-container">
+                  <div
+                    className="select-trigger"
+                    onClick={() => setiscountryopen(!iscountropen)}
+                  >
+                    {formData.country
+                      ? Countries.find((c) => c.value === formData.country)
+                          ?.label
+                      : "Select Country"}
+                  </div>
+
+                  {iscountropen && (
+                    <div className="options-list">
+                      {Countries.map((item) => (
+                        <div
+                          key={item.value}
+                          className="option-item"
+                          onClick={() => {
+                            handleInput({
+                              target: { name: "country", value: item.value },
+                            });
+
+                            setiscountryopen(false);
+                          }}
+                        >
+                          {item.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -258,7 +336,7 @@ const Form = () => {
                   name="pin"
                   value={formData.pin}
                   onChange={handleInput}
-                  pattern="[0-9]{4}"
+                  pattern="[0-9]{6}"
                   maxLength={6}
                 />
               </div>
@@ -267,20 +345,104 @@ const Form = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Courses:</label>
-                <select
-                  id="courses"
-                  name="courses"
-                  value={formData.courses}
-                  onChange={handleInput}
-                  required
-                >
-                  <option value="">select courses</option>
-                  {courses.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
+
+                <div className="custom-select-container">
+                  <div
+                    className="select-trigger"
+                    onClick={() => setIsCoursesOpen(!isCoursesOpen)}
+                  >
+                    {formData.courses
+                      ? courses.find((c) => c.value === formData.courses)?.label
+                      : "Select Course"}
+                  </div>
+
+                  {isCoursesOpen && (
+                    <div className="options-list">
+                      {courses.map((item) => (
+                        <div
+                          key={item.value}
+                          className="option-item"
+                          onClick={() => {
+                            handleInput({
+                              target: { name: "courses", value: item.value },
+                            });
+
+                            setIsCoursesOpen(false);
+                          }}
+                        >
+                          {item.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <fieldset className="document-fieldset">
+                  <legend>Documents Provided</legend>
+
+                  <div className="checkbox-group">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        name="marksheet10"
+                        checked={formData.marksheet10}
+                        onChange={handelcheckbox}
+                      />
+                      10th Marksheet
+                    </label>
+
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        name="marksheet12"
+                        checked={formData.marksheet12}
+                        onChange={handelcheckbox}
+                      />
+                      12th Marksheet
+                    </label>
+
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        name="BCA"
+                        checked={formData.BCA}
+                        onChange={handelcheckbox}
+                      />
+                      BCA Degree
+                    </label>
+
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        name="MCA"
+                        checked={formData.MCA}
+                        onChange={handelcheckbox}
+                      />
+                      MCA Degree
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <textarea
+                  className="form-textarea"
+                  name="about"
+                  value={formData.about}
+                  onChange={handleAboutInput}
+                  placeholder="Type here ... "
+                  rows="5"
+                  style={{ width: "100%", padding: "8px" }}
+                ></textarea>
+                <span style={{ fontSize: "12px", color: "#0c0404" }}>
+                  {getWordCount()}/200 words
+                </span>
               </div>
             </div>
 
