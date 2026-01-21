@@ -5,7 +5,6 @@ import Countries from "./Countries"; // country data
 import courses from "./Courses"; // courses data
 import PhoneData from "./Phonedata"; // phonedata
 
-console.log(Countries);
 const Form = () => {
   const [formData, setFormData] = useState({
     firstname: "",
@@ -31,13 +30,24 @@ const Form = () => {
   const [emailerror, setEmailerror] = useState("");
   const [iscountropen, setiscountryopen] = useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = useState(false);
+  const [iscountycodeopen, setIScountrycodeopen] = useState(false);
+  const [doberror, setDobError] = useState("");
+  const [phonecodeerror, setPhoneCodeError] = useState("");
+  const [genderError, setGenderError] = useState("");
+  const [error, setError] = useState({});
 
+  //hanlde input and gender validation
   const handleInput = (e) => {
     const { name, value } = e.target;
 
     setFormData({ ...formData, [name]: value });
+
+    if (name === "gender") {
+      setGenderError("");
+    }
   };
 
+  // handle fistname and lastname validation using regex
   const handleFullname = (e) => {
     const { name, value } = e.target;
     const setinput = value.replace(/[^a-zA-Z]/g, "");
@@ -46,8 +56,16 @@ const Form = () => {
       ...prev,
       [name]: setinput,
     }));
+
+    if (error[name]) {
+      setError((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
+  // handle father name same only difference is space
   const handleFatherInput = (e) => {
     const { name, value } = e.target;
     const setinputfather = value.replace(/[^a-zA-Z ]/g, "");
@@ -56,11 +74,19 @@ const Form = () => {
       ...prev,
       [name]: setinputfather,
     }));
+
+    if (error[name]) {
+      setError((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
-  const handlvalidation = (e) => {
+  // handle email validation
+  const handlEmailvalidation = (e) => {
     const email = e.target.value;
-    const expression = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;   
+    const expression = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (email && !expression.test(email)) {
       setEmailerror("please enter valid email");
@@ -69,6 +95,7 @@ const Form = () => {
     }
   };
 
+  // handle textarea max word limit
   const handleAboutInput = (e) => {
     const { name, value } = e.target;
 
@@ -84,6 +111,7 @@ const Form = () => {
     }
   };
 
+  // display count for word max 200
   const getWordCount = () => {
     if (!formData.about) return 0;
     return formData.about
@@ -92,6 +120,7 @@ const Form = () => {
       .filter((word) => word !== "").length;
   };
 
+  // handle checkbox
   const handelcheckbox = (e) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({
@@ -100,9 +129,44 @@ const Form = () => {
     }));
   };
 
+  // handle validation of dob min age 18
+  const handledateofbirth = (e) => {
+    const inputvalue = e.target.value;
+
+    if (!inputvalue) return;
+
+    const currentyear = new Date().getFullYear();
+    const birthyear = inputvalue.split("-")[0];
+    const age = currentyear - parseInt(birthyear);
+    if (age < 18) {
+      setDobError("invalid dob");
+    } else {
+      setDobError("");
+    }
+  };
+
   const sortPhonedata = [...PhoneData].sort(
     (a, b) => b.dial_code.length - a.dial_code.length, // soting longest to shortest
   );
+
+  // handle phone number validation min 8 to 15
+  const handlephonecodevalidation = (e) => {
+    const phonecode = e.target.value;
+    const formatecoderegex = /^[0-9\s\-\+]*$/;
+
+    if (!formatecoderegex.test(phonecode)) {
+      setPhoneCodeError("invalid error");
+      return;
+    }
+
+    const clearnumber = phonecode.replace(/[^0-9]/g, "");
+
+    if (clearnumber.length < 8 || clearnumber.length > 15) {
+      setPhoneCodeError("phone no must be  8 to 15 ");
+    } else {
+      setPhoneCodeError("");
+    }
+  };
 
   const handleDialCode = (e) => {
     const newcode = e.target.value;
@@ -110,7 +174,7 @@ const Form = () => {
     let currentphone = formData.phone;
 
     if (currentphone.startsWith(oldcode)) {
-      currentphone = currentphone.slice(oldcode.length).trim();
+      currentphone = currentphone.substring(oldcode.length).trim();
     }
 
     setFormData({
@@ -134,10 +198,43 @@ const Form = () => {
     }));
   };
 
+  // final sumbit handler
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("clikec");
+
+    const newErrors = {};
+
+    const firstNameError = validateName("First Name", formData.firstname);
+    if (firstNameError) newErrors.firstname = firstNameError;
+
+    const lastNameError = validateName("Last Name", formData.lastname);
+    if (lastNameError) newErrors.lastname = lastNameError;
+
+    const Fathernameerro = validateName(" Father name ", formData.fathername);
+    if (Fathernameerro) newErrors.fathername = Fathernameerro;
+
+    if (Object.keys(newErrors).length > 0) {
+      setError(newErrors);
+      return;
+    }
+
+    if (!formData.gender) {
+      setGenderError("Please select a gender");
+      return;
+    }
     console.log("Form Data Submitted:", formData);
     alert("Form Submitted Successfully!");
+  };
+
+  const validateName = (name, value) => {
+    if (!value.trim()) {
+      return `${name} is required`;
+    }
+    if (value.length < 3) {
+      return "Must be at least 3 characters";
+    }
+    return "";
   };
 
   return (
@@ -154,22 +251,32 @@ const Form = () => {
                 <input
                   type="text"
                   placeholder="Enter first name"
-                  required
                   name="firstname"
                   value={formData.firstname}
                   onChange={handleFullname}
+                  style={{ borderColor: error.firstname ? "red" : "black" }}
                 />
+                {error.firstname && (
+                  <span style={{ color: "red", fontSize: "12px" }}>
+                    {error.firstname}
+                  </span>
+                )}
               </div>
               <div className="form-group">
                 <label>Last Name:</label>
                 <input
                   type="text"
                   placeholder="Enter last name"
-                  required
                   name="lastname"
                   value={formData.lastname}
                   onChange={handleFullname}
+                  style={{ borderColor: error.lastname ? "red" : "black" }}
                 />
+                {error.lastname && (
+                  <span style={{ color: "red", fontSize: "12px" }}>
+                    {error.lastname}
+                  </span>
+                )}
               </div>
             </div>
             <div className="form-row">
@@ -181,11 +288,17 @@ const Form = () => {
                   name="fathername"
                   value={formData.fathername}
                   onChange={handleFatherInput}
-                  required
+                  style={{ borderColor: error.lastname ? "red" : "black" }}
                 />
+                {error.lastname && (
+                  <span style={{ color: "red", fontSize: "12px" }}>
+                    {error.lastname}
+                  </span>
+                )}
               </div>
             </div>
 
+            {/* email setction  */}
             <div className="form-group">
               <label>Email:</label>
               <input
@@ -195,7 +308,7 @@ const Form = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInput}
-                onBlur={handlvalidation}
+                onBlur={handlEmailvalidation}
                 style={{ borderColor: emailerror ? "red" : "" }}
               />
               {emailerror && (
@@ -205,18 +318,27 @@ const Form = () => {
               )}
             </div>
 
+            {/* dob section  */}
             <div className="form-row">
               <div className="form-group">
                 <label>Date of Birth:</label>
                 <input
                   type="date"
-                  required
                   name="dob"
                   value={formData.dob}
                   onChange={handleInput}
+                  onBlur={handledateofbirth}
+                  style={{ borderColor: doberror ? "red " : "" }}
+                  required
                 />
+                {doberror && (
+                  <span style={{ color: "red ", fontSize: "12px" }}>
+                    {doberror}
+                  </span>
+                )}
               </div>
 
+              {/* gender section  */}
               <div className="form-group">
                 <label>Gender:</label>
                 <div className="gender-options">
@@ -245,25 +367,47 @@ const Form = () => {
                   />{" "}
                   Other
                 </div>
+                {genderError && (
+                  <span
+                    style={{ color: "red", fontSize: "12px", marginTop: "5px" }}
+                  >
+                    {genderError}
+                  </span>
+                )}
               </div>
             </div>
 
+            {/* phone number section  */}
             <div className="form-row-phone">
               <div className="form-group-phone">
-                <label>Phone number</label>
-                <select
-                  id="dialcode"
-                  name="dialcode"
-                  value={formData.dialcode}
-                  onChange={handleDialCode}
-                  required
-                >
-                  {PhoneData.map((item) => (
-                    <option key={item.code} value={item.dial_code}>
-                      {item.flag} {item.dial_code}
-                    </option>
-                  ))}
-                </select>
+                <label htmlFor="phonedata">Phone number</label>
+                <div className="custom-select-container">
+                  <div
+                    className="select-trigger"
+                    onClick={() => setIScountrycodeopen(!iscountycodeopen)}
+                  >
+                    {formData.dialcode}
+                  </div>
+                  {iscountycodeopen && (
+                    <div className="options-list">
+                      {PhoneData.map((item) => (
+                        <div
+                          key={item.code}
+                          className="option-item"
+                          onClick={() => {
+                            handleDialCode({
+                              target: { value: item.dial_code },
+                            });
+
+                            setIScountrycodeopen(false);
+                          }}
+                        >
+                          {item.flag} {item.dial_code}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="form-input-number">
@@ -273,11 +417,19 @@ const Form = () => {
                   placeholder="Mobile Number"
                   value={formData.phone}
                   onChange={handlephoneinput}
+                  onBlur={handlephonecodevalidation}
                   required
+                  style={{ borderColor: phonecodeerror ? "red" : "" }}
                 />
+                {phonecodeerror && (
+                  <span style={{ color: "red ", fontSize: "12px" }}>
+                    {phonecodeerror}
+                  </span>
+                )}
               </div>
             </div>
 
+            {/* country section  */}
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="country">Country:</label>
@@ -316,6 +468,7 @@ const Form = () => {
               </div>
             </div>
 
+            {/* adresss section  */}
             <div className="form-row">
               <div className="form-group">
                 <label>Address:</label>
@@ -328,6 +481,8 @@ const Form = () => {
                   required
                 />
               </div>
+
+              {/* pincode */}
               <div className="form-group">
                 <label>PIN code:</label>
                 <input
@@ -342,6 +497,7 @@ const Form = () => {
               </div>
             </div>
 
+            {/* coursese section  */}
             <div className="form-row">
               <div className="form-group">
                 <label>Courses:</label>
