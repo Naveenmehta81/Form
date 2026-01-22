@@ -24,6 +24,7 @@
 }
 
 .form-box h1 {
+  padding: 2%;
   text-align: center;
   color: #0b0b13;
   background: linear-gradient(#cad8e6, #57c785);
@@ -85,12 +86,19 @@ label {
   font-size: 15px;
 }
 
+.gender-lable{
+display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
 .gender-options {
   display: flex;
   align-items: center;
   gap: 15px;
-  height: 47px;
+  height: 50px;
   padding-left: 5px;
+
 }
 
 .gender-options input[type="radio"] {
@@ -133,58 +141,42 @@ label {
   margin-top: 5px;
 }
 
-.form-row-phone {
+/* 1. Wrapper for Dropdown + Input */
+.phone-wrapper {
   display: flex;
+  gap: 10px; /* Space between the +91 box and the input box */
   width: 100%;
-  margin-bottom: 20px;
-  gap: 0px;
-  align-items: flex-end;
+  align-items: flex-start; 
+  gap: 0px;/* Ensures they align at the top */
 }
 
-.form-group-phone {
+/* 2. Fix the width of the Dropdown */
+.phone-dialcode {
+  width: 110px !important; /* Fixed width for the code */
+  flex-shrink: 0; /* Prevents it from getting squished */
+
+}
+
+/* 3. Make the Input take the rest of the space */
+.phone-input-box {
+  flex: 1;
+  /* Takes all remaining width */
+  
+}
+
+/* 4. Special hack to hide the label inside the InputField component 
+   (Since we already have a main label "Phone Number" above) */
+.phone-input-box .form-group label {
+  display: none;
+}
+
+/* 5. Ensure the dropdown height matches the input height */
+.select-trigger {
+  height: 45px; /* Must match your input field height */
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 20%;
-  min-width: 90px;
-  position: relative;
+  align-items: center;
+  justify-content: center;
 }
-
-.form-group-phone label {
-  font-weight: 500;
-  color: #0b0b13;
-  font-size: 18px;
-  white-space: nowrap;
-}
-
-.form-group-phone select {
-  width: 100%;
-  padding: 12px 5px;
-  border: 1px solid black;
-  font-size: 14px;
-  background-color: #fff;
-  cursor: pointer;
-  height: 45px;
-}
-
-.form-input-number {
-  width: 80%;
-  height: 45px;
-  display: flex;
-  flex-direction: column;
-}
-
-.form-input-number input {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid black;
-  border-left: none;
-  font-size: 15px;
-  background-color: #fff;
-  height: 45px;
-  margin-top: 0;
-}
-
 .document-fieldset {
   border: 1px solid black;
   border-radius: 8px;
