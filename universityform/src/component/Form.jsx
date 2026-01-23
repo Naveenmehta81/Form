@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import "./Form.css";
 import InputField from "./InputField"; // reusable componnet
+import Radiogroup from "./Radiogroup"; // resusable componet for radio
 import UseForm from "./useForm";
 import Countries from "./Countries"; // country data
 import courses from "./Courses"; // courses data
 import PhoneData from "./Phonedata"; // phonedata
+import Checkbox from "./Checkbox";
+import Textarea from "./Textarea";
+import SelectGroup from "./SelectGroup";
+import States from "./States";
 
 const validation = (values) => {
   let errror = {};
@@ -49,6 +54,30 @@ const validation = (values) => {
     errror.phone = "Phone number must be 8-15 digits";
   }
 
+  // 1. About Section Validation
+  if (!values.about) {
+    const wordCount = values.about.trim().split(/\s+/).length;
+    if (wordCount > 200) {
+      errror.about = `Word limit exceeded (${wordCount}/200)`;
+    }
+  }
+
+  // 2. Gap Year Validation
+  if (values.gap) {
+    const gapWordCount = values.gap.trim().split(/\s+/).length;
+    if (gapWordCount > 200) {
+      errror.gap = `Word limit exceeded (${gapWordCount}/200)`;
+    }
+  }
+
+  // nationlity & state
+  if (!values.nation) errror.nation = "select nation";
+  if (!values.state) errror.state = "select state";
+
+  // college verification
+  if (!values.bcacollgename) errror.bcacollgename = "college  Name is required";
+  if (!values.mcacollgename) errror.mcacollgename = "college  Name is required";
+
   return errror;
 };
 
@@ -80,8 +109,13 @@ const Form = () => {
       marksheet12: false,
       BCA: false,
       MCA: false,
+
       about: "",
       gap: " ",
+      nation: " ",
+      state: " ",
+      bcacollgename: "",
+      mcacollgename: " ",
     },
     validation,
   );
@@ -96,19 +130,7 @@ const Form = () => {
     setIsDialCodeOpen(false);
   };
 
-  // handle textarea max word limit
-  // const handleAboutInput = (e) => {
-  //   const { name, value } = e.target;
-
-  //   const words = value.trim().split(/\s+/)
-  //     .filter((word) => word !== "");
-
-  //   if (words.length <= 200 || value.length < formData.about.length) {
-  //     setFormData({ ...formData, [name]: value });
-  //   } else {
-  //     alert("Word limit exceeded! Maximum 200 words allowed.");
-  //   }
-  // };
+ 
 
   // display count for word max 200
   // const getWordCount = () => {
@@ -185,16 +207,40 @@ const Form = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const validerrors = validation(values);
+
+    // --- START: DUPLICATE CHECK LOGIC ---
+    
+    // 1. Get the list of students who ALREADY submitted
+    const existingData = localStorage.getItem("registered_students");
+    const studentList = existingData ? JSON.parse(existingData) : [];
+
+    // 2. Check if current email exists in that list
+    const isDuplicate = studentList.some((student) => student.email === values.email);
+
+    if (isDuplicate) {
+        // If found, add an error
+        validerrors.email = "Data already present (Email registered)";
+    }
+    // --- END: DUPLICATE CHECK LOGIC ---
+
     setError(validerrors);
 
     if (Object.keys(validerrors).length === 0) {
-      console.log("form submitted", values);
-      alert("form submitted");
-      clearForm();
+        // 3. Success! Add to the "Database"
+        const newItem = {
+             id: Date.now(),
+             ...values
+        };
+        const updatedItems = [...studentList, newItem];
+        localStorage.setItem("registered_students", JSON.stringify(updatedItems));
+        
+        console.log("Success data added");
+        alert("Form Submitted Successfully");
+        clearForm();
     } else {
-      alert("error in form ");
+        alert("Error in form");
     }
-  };
+};
 
   // const validateName = (name, value) => {
   //   if (!value.trim()) {
@@ -267,34 +313,14 @@ const Form = () => {
                 onBlur={handleblur}
               />
 
-              <label className="gender-lable">Gender:</label>
-              <div className="gender-options">
-                {["male", "female", "other"].map((g) => (
-                  <label key={g}>
-                    <input
-                      type="radio"
-                      name="gender"
-                      value={g}
-                      checked={values.gender === g}
-                      onChange={handleChange}
-                    />{" "}
-                    {g.charAt(0).toUpperCase() + g.slice(1)}
-                  </label>
-                ))}
-              </div>
-              {error.gender && (
-                <span
-                  style={{
-                    color: "red",
-                    fontSize: "12px",
-                    marginTop: "50px",
-                    position: "relative",
-                    right: "245px",
-                  }}
-                >
-                  {error.gender}
-                </span>
-              )}
+              <Radiogroup
+                label="gender"
+                name="gender"
+                onChange={handleChange}
+                value={values.gender}
+                error={error.gender}
+                options={["male", "female", "other"]}
+              />
             </div>
 
             <div className="form-row">
@@ -321,237 +347,184 @@ const Form = () => {
             {/* phone number section  */}
 
             <div className="form-row">
-  {/* Main Group to stack Label on top of the row */}
-  <div className="form-group">
-    <label>Phone Number</label>
-
-    {/* Wrapper to put Dropdown and Input side-by-side */}
-    <div className="phone-wrapper">
-      
-      {/* 1. Dropdown Section */}
-      <div className="custom-select-container phone-dialcode">
-        <div
-          className="select-trigger"
-          onClick={() => setIsDialCodeOpen(!isDialCodeOpen)}
-        >
-          {values.dialcode || "+91"}
-        </div>
-        
-        {isDialCodeOpen && (
-          <div className="options-list">
-            {PhoneData.map((item) => (
-              <div
-                key={item.code}
-                className="option-item"
-                onClick={() => {
-                  handleDialCode(item.dial_code);
-                }}
-              >
-                {item.flag} {item.dial_code}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* 2. Input Section */}
-      <div className="phone-input-box">
-        <InputField
-          name="phone"
-          placeholder="Enter phone number"
-          value={values.phone}
-          onBlur={handleblur}
-          onChange={handleChange}
-          // We don't pass a label here because we handled it above
-          error={error.phone} 
-        />
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-            {/* <div className="form-input-number">
-                <input
-                  type="text"
-                  name="phone"
-                  placeholder="Mobile Number"
-                  value={formData.phone}
-                  onChange={handlephoneinput}
-                  onBlur={handlephonecodevalidation}
-                  required
-                  style={{ borderColor: phonecodeerror ? "red" : "" }}
-                />
-                {phonecodeerror && (
-                  <span style={{ color: "red ", fontSize: "12px" }}>
-                    {phonecodeerror}
-                  </span>
-                )}
-              </div>
-            </div> */}
-
-            {/* country section  */}
-            {/* <div className="form-row">
+              {/* Main Group to stack Label on top of the row */}
               <div className="form-group">
-                <label htmlFor="country">Country:</label>
+                <label>Phone Number</label>
 
-                <div className="custom-select-container">
-                  <div
-                    className="select-trigger"
-                    onClick={() => setiscountryopen(!iscountropen)}
-                  >
-                    {formData.country
-                      ? Countries.find((c) => c.value === formData.country)
-                          ?.label
-                      : "Select Country"}
-                  </div>
-
-                  {iscountropen && (
-                    <div className="options-list">
-                      {Countries.map((item) => (
-                        <div
-                          key={item.value}
-                          className="option-item"
-                          onClick={() => {
-                            handleInput({
-                              target: { name: "country", value: item.value },
-                            });
-
-                            setiscountryopen(false);
-                          }}
-                        >
-                          {item.label}
-                        </div>
-                      ))}
+                {/* Wrapper to put Dropdown and Input side-by-side */}
+                <div className="phone-wrapper">
+                  {/* 1. Dropdown Section */}
+                  <div className="custom-select-container phone-dialcode">
+                    <div
+                      className="select-trigger"
+                      onClick={() => setIsDialCodeOpen(!isDialCodeOpen)}
+                    >
+                      {values.dialcode || "+91"}
                     </div>
-                  )}
-                </div>
-              </div>
-            </div> */}
 
-            {/* coursese section  */}
-            {/* <div className="form-row">
-              <div className="form-group">
-                <label>Courses:</label>
-
-                <div className="custom-select-container">
-                  <div
-                    className="select-trigger"
-                    onClick={() => setIsCoursesOpen(!isCoursesOpen)}
-                  >
-                    {formData.courses
-                      ? courses.find((c) => c.value === formData.courses)?.label
-                      : "Select Course"}
+                    {isDialCodeOpen && (
+                      <div className="options-list">
+                        {PhoneData.map((item) => (
+                          <div
+                            key={item.code}
+                            className="option-item"
+                            onClick={() => {
+                              handleDialCode(item.dial_code);
+                            }}
+                          >
+                            {item.flag}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  {isCoursesOpen && (
-                    <div className="options-list">
-                      {courses.map((item) => (
-                        <div
-                          key={item.value}
-                          className="option-item"
-                          onClick={() => {
-                            handleInput({
-                              target: { name: "courses", value: item.value },
-                            });
-
-                            setIsCoursesOpen(false);
-                          }}
-                        >
-                          {item.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div> */}
-
-            {/* <div className="form-row">
-              <div className="form-group">
-                <fieldset className="document-fieldset">
-                  <legend>Documents Provided</legend>
-
-                  <div className="checkbox-group">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        name="marksheet10"
-                        checked={formData.marksheet10}
-                        onChange={handelcheckbox}
-                      />
-                      10th Marksheet
-                    </label>
-
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        name="marksheet12"
-                        checked={formData.marksheet12}
-                        onChange={handelcheckbox}
-                      />
-                      12th Marksheet
-                    </label>
-
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        name="BCA"
-                        checked={formData.BCA}
-                        onChange={handelcheckbox}
-                      />
-                      BCA Degree
-                    </label>
-
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        name="MCA"
-                        checked={formData.MCA}
-                        onChange={handelcheckbox}
-                      />
-                      MCA Degree
-                    </label>
+                  {/* 2. Input Section */}
+                  <div className="phone-input-box">
+                    <InputField
+                      name="phone"
+                      placeholder="Enter phone number"
+                      value={values.phone}
+                      onBlur={handleblur}
+                      onChange={handleChange}
+                      error={error.phone}
+                    />
                   </div>
-                </fieldset>
+                </div>
               </div>
             </div>
 
             <div className="form-row">
-              <div className="form-group">
-                <textarea
-                  className="form-textarea"
-                  name="about"
-                  value={formData.about}
-                  onChange={handleAboutInput}
-                  placeholder="tell me about yourself in 200 word... "
-                  rows="5"
-                  style={{ width: "100%", padding: "8px" }}
-                ></textarea>
-                <span style={{ fontSize: "12px", color: "#0c0404" }}>
-                  {getWordCount()}/200 words
-                </span>
-              </div>
+              <Checkbox
+                legend="documetn provide"
+                value={values}
+                onChange={handleChange}
+                option={[
+                  { name: "marksheet10", label: "10th Marksheet" },
+                  { name: "marksheet12", label: "12th Marksheet" },
+                  { name: "BCA", label: "BCA Degree" },
+                  { name: "MCA", label: "MCA Degree" },
+                ]}
+              />
             </div>
-            
+
+            <label>
+              About Yourself:
               <div className="form-row">
-              <div className="form-group">
-                <label>Gap year explanation:</label>
-                <textarea
-                  className="form-textarea"
-                  name="gap"
-                  value={formData.gap}
-                  onChange={handleAboutInput}
-                  placeholder="explain reason about your gap year... "
-                  rows="5"
-                  style={{ width: "100%", padding: "8px" }}
-                ></textarea>
-                <span style={{ fontSize: "12px", color: "#0c0404" }}>
-                  {getWordCount()}/200 words
-                </span>
+                <Textarea
+                  name="about"
+                  value={values.about}
+                  onChange={handleChange}
+                  onlBur={handleblur}
+                  placeholder="Tell us about yourself..."
+                  maxWords={200}
+                />
+                {error.about && (
+                  <span style={{ color: "red", fontSize: "12px" }}>
+                    {error.about}
+                  </span>
+                )}
               </div>
+            </label>
+
+            <label>
+              Gap Year Explanation:
+              <div className="form-row">
+                <Textarea
+                  name="gap"
+                  value={values.gap}
+                  onChange={handleChange}
+                  onlBur={handleblur}
+                  placeholder="Explain your gap year (if any)..."
+                  maxWords={200}
+                />
+                {error.about && (
+                  <span style={{ color: "red", fontSize: "12px" }}>
+                    {error.about}
+                  </span>
+                )}
+              </div>
+            </label>
+
+            <div className="form-row">
+              <Radiogroup
+                label="Nationality"
+                name="nation"
+                value={values.nation}
+                onChange={handleChange}
+                error={error.nation}
+                options={["India", "Nepal", "other"]}
+
+              />
+              <SelectGroup
+                label="Country if other "
+                name="country"
+                value={values.country}
+                onChange={handleChange}
+                options={Countries} // Pass the entire list of countries
+                placeholder="Select Country"
+                error={error.country}
+              />
+             
             </div>
- */}
+              <div className="form-row">
+                   <Radiogroup
+                label="state"
+                name="state"
+                value={values.state}
+                onChange={handleChange}
+                error={error.state}
+                options={["MP", "other"]}
+              />
+              <SelectGroup
+  label="choose state if other :"
+  name="state"
+  value={values.state}
+  onChange={handleChange}
+  options={States}
+  placeholder="Select State"
+  error={error.state}
+/>
+              </div>
+
+            
+
+            <div className="form-row">
+              {/* 2. Course Select */}
+              <SelectGroup
+                label="Courses"
+                name="courses"
+                value={values.courses}
+                onChange={handleChange}
+                options={courses} // Pass the entire list of courses
+                placeholder="Select Course"
+                error={error.courses}
+              />
+            </div>
+
+            <label>
+              Enter your coollege name-
+              <div className="form-row">
+                <InputField
+                  label=" BCA "
+                  name="bcacollgename"
+                  value={values.bcacollgename}
+                  placeholder="Enter Your college Name:"
+                  error={error.bcacollgename}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-row">
+                <InputField
+                  label=" MCA "
+                  name="mcacollgename"
+                  value={values.mcacollgename}
+                  placeholder="Enter Your college Name:"
+                  error={error.mcacollgename}
+                  onChange={handleChange}
+                />
+              </div>
+            </label>
 
             <button type="submit" className="submit-btn">
               Submit
@@ -564,4 +537,3 @@ const Form = () => {
 };
 
 export default Form;
- 

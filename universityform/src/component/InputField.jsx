@@ -5,7 +5,7 @@ const InputField = ({ label, name, value, onChange,  onBlur , error, type = "tex
   return (
     <div className="form-group">
       <label>{label}:</label>
-      <input
+      <input 
         type={type}
         name={name}
         value={value}

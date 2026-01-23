@@ -1,21 +1,30 @@
 import React from "react";
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
+
+
+const LOCAL_STORAGE_KEY = 'collegeformdata';
 
 const UseForm = (intailvalue, validation) => {
+  const [values, setValues] = useState(() => {
+    const savedata = localStorage.getItem("LOCAL_STORAGE_KEY");
 
-  const [values, setValues] = useState(() =>{
-        const savedata = localStorage.getItem("collegeformdata");
-
-        return savedata ? JSON.parse(savedata) : intailvalue ; 
+    return savedata ? JSON.parse(savedata) : intailvalue;
   });
+
+  
+   
+
+
+
+
+
   const [error, setError] = useState({});
 
-
-               
-   useEffect(() => {
-    localStorage.setItem("collegeformdata"  , JSON.stringify(values));
-   }, [values]) ; 
-
+  useEffect(() => {
+    localStorage.setItem( LOCAL_STORAGE_KEY, JSON.stringify(values));
+    
+  },[values]);
+  console.log(values);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -45,14 +54,21 @@ const UseForm = (intailvalue, validation) => {
       [name]: validationerror[name],
     });
   };
- 
-   const clearForm = () => {
+
+  const clearForm = () => {
     setValues(intailvalue); // Reset state to empty
     localStorage.removeItem("collegeformdata"); // Delete from storage
   };
-   
 
-  return { values, setValues, error, setError, handleChange, handleblur , clearForm };
+  return {
+    values,
+    setValues,
+    error,
+    setError,
+    handleChange,
+    handleblur,
+    clearForm,
+  };
 };
 
 export default UseForm;
