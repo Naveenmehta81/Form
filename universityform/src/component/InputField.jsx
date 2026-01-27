@@ -7,7 +7,7 @@ const InputField = ({ label, name, value, onChange,  onBlur , error, type = "tex
       <label>{label}:</label>
       <input 
         type={type}
-        name={name}
+        name={name}               
         value={value}
         onChange={onChange}
         onBlur={onBlur}

@@ -1,0 +1,304 @@
+:root {
+  --primary-color: #090928;
+  --accent-color: #1294d1;
+  --success-color: #337c1d;
+  --error-color: #e74c3c;
+  --bg-color: #f7f7ff;
+  --card-bg: #f9f9f9;
+  --border-color: #000000;
+  --input-height: 45px;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; 
+}
+
+.form-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  background: var(--bg-color);
+}
+
+.form-box {
+  background-color: var(--card-bg);
+  width: 100%;
+  max-width: 750px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Header Section */
+.form-box h1 {
+  padding: 2%;
+  text-align: center;
+  color: var(--primary-color);
+  background: linear-gradient(#cad8e6, #57c785);
+  margin-bottom: 0; /* Removed bottom margin here, handled by padding below */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Form Content Wrapper */
+.from-data {
+  padding: 40px;
+}
+
+.from-data h2 {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.from-field {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Grid System for Rows */
+.form-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+}
+
+label {
+  font-weight: 500;
+  color: var(--primary-color);
+  font-size: 16px;
+}
+
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group select,
+.form-textarea {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid var(--border-color);
+  font-size: 15px;
+  background-color: #fff;
+  border-radius: 2px; /* Slight curve looks better */
+  height: var(--input-height);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+/* Textarea Specifics */
+.form-textarea {
+  min-height: 120px;
+  height: auto; /* Override fixed height */
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-textarea:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px rgba(18, 148, 209, 0.2);
+}
+
+.error {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.phone-wrapper {
+  display: flex;
+  width: 100%;
+  height: auto; /* FIXED: Was 200%, caused layout bugs */
+  align-items: flex-start;
+  gap: 0; /* Attach them together */
+}
+
+/* The Country Code Dropdown Box */
+.phone-dialcode {
+  width: 110px !important;
+  flex-shrink: 0;
+}
+
+.phone-dialcode .select-trigger {
+  border-right: none; /* Merge look */
+  border-radius: 4px 0 0 4px;
+}
+
+/* The Number Input Box */
+.phone-input-box {
+  flex: 1;
+}
+
+.phone-input-box input {
+  border-radius: 0 4px 4px 0;
+  border-left: 1px solid var(--border-color); 
+}
+
+
+
+.phone-input-box .form-group label {
+  display: none;
+}
+
+
+
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.select-trigger {
+  width: 100%;
+  padding: 0 15px;
+  border: 1px solid var(--border-color);
+  background: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--input-height);
+  border-radius: 4px;
+}
+
+.options-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-top: none;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.option-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.option-item:hover {
+  background-color: #f0f0f0;
+}
+
+
+/* Radio Group */
+.gender-lable {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.gender-options {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: var(--input-height);
+  padding-left: 5px;
+}
+
+.gender-options label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 400; 
+  
+}
+
+.gender-options input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+/* Checkbox Group */
+.document-fieldset {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+}
+
+.document-fieldset legend {
+  padding: 0 10px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+/* =========================================
+   7. BUTTONS
+   ========================================= */
+.submit-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.submit-btn:hover {
+  background: var(--success-color);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}

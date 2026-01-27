@@ -31,10 +31,15 @@ const UseForm = (intailvalue, validation) => {
 
     const val = type === "checkbox" ? checked : value;
 
-    if (name === "firstname" || name === "lastname" || name === "fathername") {
-      const cleanValue = val.replace(/[^a-zA-Z\s]/g, "");
+    if (name === "firstname" || name === "lastname"  ) {
+      const cleanValue = val.replace(/[^a-zA-Z]/g,"");
       setValues({ ...values, [name]: cleanValue });
-    } else {
+
+    }else if(name === "fathername"){
+           const cleanValue = val.replace(/[^a-zA-Z]s]/g, "");
+           setValues({...values, [name]: cleanValue})
+    } 
+    else {
       setValues({ ...values, [name]: val });
     }
 
@@ -44,6 +49,11 @@ const UseForm = (intailvalue, validation) => {
     }
   };
 
+
+
+ 
+
+
   const handleblur = (e) => {
     const { name } = e.target;
 
@@ -51,7 +61,7 @@ const UseForm = (intailvalue, validation) => {
 
     setError({
       ...error,
-      [name]: validationerror[name],
+      [name]: validationerror[name],  
     });
   };
 

@@ -1,22 +1,33 @@
 import React, { useState } from "react";
 import "./Form.css";
-import InputField from "./InputField"; // reusable componnet
-import Radiogroup from "./Radiogroup"; // resusable componet for radio
-import UseForm from "./useForm";
-import Countries from "./Countries"; // country data
-import courses from "./Courses"; // courses data
-import PhoneData from "./Phonedata"; // phonedata
-import Checkbox from "./Checkbox";
-import Textarea from "./Textarea";
-import SelectGroup from "./SelectGroup";
-import States from "./States";
+import InputField from "./component/InputField"; // reusable componnet
+import Radiogroup from "./component/Radiogroup"; // resusable componet for radio
+import UseForm from "./Customhook/UseForm";
+import Countries from "./Data/Countries"; // country data
+import courses from "./Data/Courses"; // courses data
+import PhoneData from "./Data/Phonedata"; // phonedata
+import Checkbox from "./component/Checkbox";
+import Textarea from "./component/Textarea";
+import SelectGroup from "./component/SelectGroup";
+import States from "./Data/States";
 
 const validation = (values) => {
   let errror = {};
 
   //name validation
-  if (!values.firstname) errror.firstname = "First Name is required";
-  if (!values.lastname) errror.lastname = "Last Name is required";
+   
+  if (!values.firstname) {
+    errror.firstname = "First Name is required";
+  } 
+   else if(values.firstname.length < 3){
+         errror.firstname = "Must be at least 3 characters"
+         }
+
+ if (!values.lastname) {
+  errror.lastname = "Last Name is required";
+ } else if(values.lastname.length < 3){
+         errror.lastname = "Must be at least 3 characters"
+         }
   if (!values.fathername) errror.fathername = "father name is reqiured";
 
   // email validation
@@ -55,7 +66,10 @@ const validation = (values) => {
   }
 
   // 1. About Section Validation
-  if (!values.about) {
+  if(!values.about || values.about.trim() === ""){
+     errror.about = "about yourself required "; 
+  }
+  else {
     const wordCount = values.about.trim().split(/\s+/).length;
     if (wordCount > 200) {
       errror.about = `Word limit exceeded (${wordCount}/200)`;
@@ -63,6 +77,7 @@ const validation = (values) => {
   }
 
   // 2. Gap Year Validation
+   
   if (values.gap) {
     const gapWordCount = values.gap.trim().split(/\s+/).length;
     if (gapWordCount > 200) {
@@ -73,6 +88,8 @@ const validation = (values) => {
   // nationlity & state
   if (!values.nation) errror.nation = "select nation";
   if (!values.state) errror.state = "select state";
+  if (!values.country) errror.country = "select country";
+  if (!values.courses) errror.courses = "select courses";
 
   // college verification
   if (!values.bcacollgename) errror.bcacollgename = "college  Name is required";
@@ -89,6 +106,7 @@ const Form = () => {
     setError,
     handleChange,
     handleblur,
+
     clearForm,
   } = UseForm(
     {
@@ -111,26 +129,62 @@ const Form = () => {
       MCA: false,
 
       about: "",
-      gap: " ",
-      nation: " ",
-      state: " ",
+      gap: "",
+      nation: "",
+      state: "",
       bcacollgename: "",
-      mcacollgename: " ",
+      mcacollgename: "",
     },
     validation,
   );
 
   const [isDialCodeOpen, setIsDialCodeOpen] = useState(false);
 
-  const handleDialCode = (newcode) => {
+  const handleDialCode = (newCode) => {
+    const oldCode = values.dialcode;
+    let currentPhone = values.phone;
+
+    if (currentPhone.startsWith(oldCode)) {
+      // Remove old code and add new code
+      currentPhone = newCode + currentPhone.substring(oldCode.length);
+    } else if (!currentPhone.startsWith("+")) {
+      // If user typed "98765..." without code, prepend the new code
+      currentPhone = newCode + currentPhone;
+    }
+
     setValues({
       ...values,
-      dialcode: newcode,
+      dialcode: newCode,
+      phone: currentPhone,
     });
     setIsDialCodeOpen(false);
   };
 
- 
+  const sortedPhoneData = [...PhoneData].sort(
+    (a, b) => b.dial_code.length - a.dial_code.length,
+  );
+
+  const handlephoneinput = (e) => {
+    const inputValue = e.target.value;
+
+    // Check if the typed number starts with any known dial code
+    const matchedCountry = sortedPhoneData.find((item) =>
+      inputValue.startsWith(item.dial_code),
+    );
+
+    if (matchedCountry) {
+      setValues({
+        ...values,
+        phone: inputValue,
+        dialcode: matchedCountry.dial_code,
+      });
+    } else {
+      setValues({
+        ...values,
+        phone: inputValue,
+      });
+    }
+  };
 
   // display count for word max 200
   // const getWordCount = () => {
@@ -209,38 +263,40 @@ const Form = () => {
     const validerrors = validation(values);
 
     // --- START: DUPLICATE CHECK LOGIC ---
-    
+
     // 1. Get the list of students who ALREADY submitted
     const existingData = localStorage.getItem("registered_students");
     const studentList = existingData ? JSON.parse(existingData) : [];
 
     // 2. Check if current email exists in that list
-    const isDuplicate = studentList.some((student) => student.email === values.email);
+    const isDuplicate = studentList.some(
+      (student) => student.email === values.email,
+    );
 
     if (isDuplicate) {
-        // If found, add an error
-        validerrors.email = "Data already present (Email registered)";
+      // If found, add an error
+      validerrors.email = "Data already present (Email registered)";
     }
     // --- END: DUPLICATE CHECK LOGIC ---
 
     setError(validerrors);
 
     if (Object.keys(validerrors).length === 0) {
-        // 3. Success! Add to the "Database"
-        const newItem = {
-             id: Date.now(),
-             ...values
-        };
-        const updatedItems = [...studentList, newItem];
-        localStorage.setItem("registered_students", JSON.stringify(updatedItems));
-        
-        console.log("Success data added");
-        alert("Form Submitted Successfully");
-        clearForm();
+      // 3. Success! Add to the "Database"
+      const newItem = {
+        id: Date.now(),
+        ...values,
+      };
+      const updatedItems = [...studentList, newItem];
+      localStorage.setItem("registered_students", JSON.stringify(updatedItems));
+
+      console.log("Success data added");
+      alert("Form Submitted Successfully");
+      clearForm();
     } else {
-        alert("Error in form");
+      alert("Error in form");
     }
-};
+  };
 
   // const validateName = (name, value) => {
   //   if (!value.trim()) {
@@ -260,6 +316,7 @@ const Form = () => {
           <h2>Fill this details</h2>
 
           <form className="from-field" onSubmit={handleSubmit}>
+             {/* name section firstname , lastname  space not include  */}
             <div className="form-row">
               <InputField
                 label="Firstname Name "
@@ -279,6 +336,7 @@ const Form = () => {
                 error={error.lastname}
               />
             </div>
+            {/* name section father name space include  */}
             <div className="form-row">
               <InputField
                 label="Father Name"
@@ -302,6 +360,8 @@ const Form = () => {
               onBlur={handleblur}
             />
 
+
+          {/* dob section  */}
             <div className="form-row">
               <InputField
                 label="Date of Birth"
@@ -313,6 +373,8 @@ const Form = () => {
                 onBlur={handleblur}
               />
 
+
+            {/* gender section  */}
               <Radiogroup
                 label="gender"
                 name="gender"
@@ -323,6 +385,9 @@ const Form = () => {
               />
             </div>
 
+
+
+              {/* address and pin section  */}
             <div className="form-row">
               <InputField
                 label=" Adress:"
@@ -344,14 +409,15 @@ const Form = () => {
               />
             </div>
 
+
+
+
             {/* phone number section  */}
 
             <div className="form-row">
-              {/* Main Group to stack Label on top of the row */}
               <div className="form-group">
                 <label>Phone Number</label>
 
-                {/* Wrapper to put Dropdown and Input side-by-side */}
                 <div className="phone-wrapper">
                   {/* 1. Dropdown Section */}
                   <div className="custom-select-container phone-dialcode">
@@ -359,24 +425,43 @@ const Form = () => {
                       className="select-trigger"
                       onClick={() => setIsDialCodeOpen(!isDialCodeOpen)}
                     >
-                      {values.dialcode || "+91"}
-                    </div>
-
-                    {isDialCodeOpen && (
-                      <div className="options-list">
-                        {PhoneData.map((item) => (
-                          <div
-                            key={item.code}
-                            className="option-item"
-                            onClick={() => {
-                              handleDialCode(item.dial_code);
+                      {(() => {
+                        const selectedCountry = PhoneData.find(
+                          (item) =>
+                            item.dial_code === (values.dialcode || "+91"),
+                        );
+                        return (
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
                             }}
                           >
-                            {item.flag}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                            <span>{selectedCountry?.flag}</span>
+                            {/* <span>{values.dialcode || "+91"}</span> */}
+                          </span>
+                        );
+                      })()}
+
+                      {isDialCodeOpen && (
+                        <div className="options-list">
+                          {PhoneData.map((item) => (
+                            <div
+                              key={item.code}
+                              className="option-item"
+                              onClick={() => {
+                                handleDialCode(item.dial_code);
+                              }}
+                            >
+                              {item.flag}
+                              {item.dial_code}
+                              {item.country}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* 2. Input Section */}
@@ -386,13 +471,16 @@ const Form = () => {
                       placeholder="Enter phone number"
                       value={values.phone}
                       onBlur={handleblur}
-                      onChange={handleChange}
+                      onChange={handlephoneinput}
                       error={error.phone}
                     />
                   </div>
                 </div>
               </div>
             </div>
+
+             
+           {/* documetn section  */}
 
             <div className="form-row">
               <Checkbox
@@ -408,6 +496,9 @@ const Form = () => {
               />
             </div>
 
+
+
+           {/* text area about and gap year  */}
             <label>
               About Yourself:
               <div className="form-row">
@@ -415,15 +506,12 @@ const Form = () => {
                   name="about"
                   value={values.about}
                   onChange={handleChange}
-                  onlBur={handleblur}
+                  onBlur={handleblur}
                   placeholder="Tell us about yourself..."
                   maxWords={200}
+                  error={error.about}
                 />
-                {error.about && (
-                  <span style={{ color: "red", fontSize: "12px" }}>
-                    {error.about}
-                  </span>
-                )}
+              
               </div>
             </label>
 
@@ -434,17 +522,17 @@ const Form = () => {
                   name="gap"
                   value={values.gap}
                   onChange={handleChange}
-                  onlBur={handleblur}
+                  onBlur={handleblur}
                   placeholder="Explain your gap year (if any)..."
                   maxWords={200}
+                  error={error.gap}
                 />
-                {error.about && (
-                  <span style={{ color: "red", fontSize: "12px" }}>
-                    {error.about}
-                  </span>
-                )}
+                
               </div>
             </label>
+
+
+            {/* radio nationality and state  */}
 
             <div className="form-row">
               <Radiogroup
@@ -454,7 +542,6 @@ const Form = () => {
                 onChange={handleChange}
                 error={error.nation}
                 options={["India", "Nepal", "other"]}
-
               />
               <SelectGroup
                 label="Country if other "
@@ -465,10 +552,10 @@ const Form = () => {
                 placeholder="Select Country"
                 error={error.country}
               />
-             
             </div>
-              <div className="form-row">
-                   <Radiogroup
+
+            <div className="form-row">
+              <Radiogroup
                 label="state"
                 name="state"
                 value={values.state}
@@ -476,18 +563,20 @@ const Form = () => {
                 error={error.state}
                 options={["MP", "other"]}
               />
-              <SelectGroup
-  label="choose state if other :"
-  name="state"
-  value={values.state}
-  onChange={handleChange}
-  options={States}
-  placeholder="Select State"
-  error={error.state}
-/>
-              </div>
 
-            
+
+
+               {/*  state section  */}
+              <SelectGroup
+                label="choose state if other :"
+                name="state"
+                value={values.state}
+                onChange={handleChange}
+                options={States}
+                placeholder="Select State"
+                error={error.state}
+              />
+            </div>
 
             <div className="form-row">
               {/* 2. Course Select */}
@@ -502,6 +591,8 @@ const Form = () => {
               />
             </div>
 
+
+             {/* college name section  */}
             <label>
               Enter your coollege name-
               <div className="form-row">

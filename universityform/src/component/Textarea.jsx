@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Textarea = ({name , value ,onChange , placeholder ,  maxWords = 200 , onlBur ,...props}) => {
+const Textarea = ({name , value ,onChange , placeholder ,  maxWords = 200 , onBlur , error ,...props}) => {
 
 
     const getWordCount = () =>{
@@ -18,16 +18,27 @@ const Textarea = ({name , value ,onChange , placeholder ,  maxWords = 200 , onlB
           name={name}
           value={value}
           onChange={onChange}
-          placeholder={placeholder}
-        //   onlBur={onlBur}
+          placeholder={placeholder} 
+           onBlur={onBlur}
           {...props}
           rows="5"
           style={{width:"100%" , padding:'8px'}}
-        ></textarea> 
-         <span style={{ fontSize: "12px", color: "#0c0404" }}>
-              {getWordCount()}/{maxWords}
-         </span>
+        ></textarea>
+  <div    
+          
+          style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
+        
+        {/* 1. Error Message */}
+        <span style={{ color: "red", fontSize: "12px" }}>
+          {error}
+        </span>
 
+        {/* 2. Word Count (Always Visible) */}
+        <span style={{ fontSize: "12px", color: "#0c0404" }}>
+          {getWordCount()}/{maxWords} words
+        </span>
+        
+      </div>
          
       
     </div>
