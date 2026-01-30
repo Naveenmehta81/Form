@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 
-const SelectGroup = ({ label, name, value, onChange, options, placeholder, error }) => {
+const SelectGroup = ({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+}) => {
   // 1. Internal state to handle open/close automatically
   const [isOpen, setIsOpen] = useState(false);
 
@@ -13,9 +21,9 @@ const SelectGroup = ({ label, name, value, onChange, options, placeholder, error
         value: selectedValue,
       },
     };
-    
+
     onChange(fakeEvent); // Update the main form state
-    setIsOpen(false);    // Close the dropdown immediately
+    setIsOpen(false); // Close the dropdown immediately
   };
 
   // 3. Find the Label (e.g., turn "IN" into "India")
@@ -25,12 +33,10 @@ const SelectGroup = ({ label, name, value, onChange, options, placeholder, error
     <div className="form-group">
       <label>{label}:</label>
       
+
       <div className="custom-select-container">
         {/* The Trigger Box */}
-        <div 
-          className="select-trigger" 
-          onClick={() => setIsOpen(!isOpen)}
-        >
+        <div className="select-trigger" onClick={() => setIsOpen(!isOpen)}>
           {selectedOption ? selectedOption.label : placeholder}
         </div>
 
@@ -52,7 +58,14 @@ const SelectGroup = ({ label, name, value, onChange, options, placeholder, error
 
       {/* Error Message */}
       {error && (
-        <span style={{ color: "red", fontSize: "12px", marginTop: "5px", display: "block" }}>
+        <span
+          style={{
+            color: "red",
+            fontSize: "12px",
+            marginTop: "5px",
+            display: "block",
+          }}
+        >
           {error}
         </span>
       )}
@@ -62,10 +75,8 @@ const SelectGroup = ({ label, name, value, onChange, options, placeholder, error
 
 export default SelectGroup;
 
-
-
-
-{/* <div className="form-input-number">
+{
+  /* <div className="form-input-number">
                 <input
                   type="text"
                   name="phone"
@@ -82,10 +93,14 @@ export default SelectGroup;
                   </span>
                 )}
               </div>
-            </div> */}
+            </div> */
+}
 
-            {/* country section  */}
-            {/* <div className="form-row">
+{
+  /* country section  */
+}
+{
+  /* <div className="form-row">
               <div className="form-group">
                 <label htmlFor="country">Country:</label>
 
@@ -121,10 +136,14 @@ export default SelectGroup;
                   )}
                 </div>
               </div>
-            </div> */}
+            </div> */
+}
 
-            {/* coursese section  */}
-            {/* <div className="form-row">
+{
+  /* coursese section  */
+}
+{
+  /* <div className="form-row">
               <div className="form-group">
                 <label>Courses:</label>
 
@@ -159,4 +178,5 @@ export default SelectGroup;
                   )}
                 </div>
               </div> 
-            </div> */}
+            </div> */
+}

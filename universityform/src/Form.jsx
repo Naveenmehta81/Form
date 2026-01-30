@@ -10,25 +10,28 @@ import Checkbox from "./component/Checkbox";
 import Textarea from "./component/Textarea";
 import SelectGroup from "./component/SelectGroup";
 import States from "./Data/States";
+import Ugccollegedata from "./Data/Ugccollegedata";
 
 const validation = (values) => {
   let errror = {};
 
   //name validation
-   
   if (!values.firstname) {
     errror.firstname = "First Name is required";
-  } 
-   else if(values.firstname.length < 3){
-         errror.firstname = "Must be at least 3 characters"
-         }
+  } else if (values.firstname.length < 3) {
+    errror.firstname = "Must be at least 3 characters";
+  }
 
- if (!values.lastname) {
-  errror.lastname = "Last Name is required";
- } else if(values.lastname.length < 3){
-         errror.lastname = "Must be at least 3 characters"
-         }
-  if (!values.fathername) errror.fathername = "father name is reqiured";
+  if (!values.lastname) {
+    errror.lastname = "Last Name is required";
+  } else if (values.lastname.length < 3) {
+    errror.lastname = "Must be at least 3 characters";
+  }
+  if (!values.fathername) {
+    errror.fathername = "father name is reqiured";
+  } else if (values.fathername.length < 3) {
+    errror.fathername = "Must be at least 3 characters";
+  }
 
   // email validation
   if (values.email) {
@@ -53,35 +56,63 @@ const validation = (values) => {
   if (!values.gender) errror.gender = "select gender";
 
   //adress
-  if (!values.address) errror.address = "address required ";
+
+  if (!values.address) {
+    errror.address = "address required ";
+  } else if (values.address.length < 10) {
+    errror.address = "address  must be at least 10 characters";
+  }
+
   //pin
   if (!values.pin) errror.pin = "pin required ";
 
   // phone validation
-  // ... inside validation function ...
-  if (!values.phone) {
+  //1 approch is like hardcoding but it take so if else if for all country code
+  //2 approch is better we use regex for validation  but it is complex also
+  // 3 i use like in phonedata add lenght and then handle it in form.jsx
+
+  if (!values.phone || values.phone.trim() === values.dialcode) {
     errror.phone = "Phone number is required";
-  } else if (values.phone.length < 8 || values.phone.length > 15) {
-    errror.phone = "Phone number must be 8-15 digits";
+  } else {
+    const contryData = PhoneData.find(
+      (item) => item.dial_code === values.dialcode,
+    );
+
+    const registernumber = values.phone.replace(values.dialcode, "").trim();
+
+    if (contryData) {
+      if (registernumber.length != contryData.length) {
+        errror.phone = `${contryData.name} phone number must be ${contryData.length} digits long `;
+      } else {
+        const length = PhoneData.map((item) => item.length);
+        const minlength = Math.min(...length);
+        const maxlength = Math.max(...length);
+        if (
+          registernumber.length >= minlength ||
+          registernumber.length < maxlength
+        ) {
+          errror.phone = `Invalid phone number length. Must be between ${minlength} and ${maxlength} digits.`;
+        }
+      }
+    }
   }
 
   // 1. About Section Validation
-  if(!values.about || values.about.trim() === ""){
-     errror.about = "about yourself required "; 
-  }
-  else {
-    const wordCount = values.about.trim().split(/\s+/).length;
-    if (wordCount > 200) {
-      errror.about = `Word limit exceeded (${wordCount}/200)`;
+  if (!values.about || values.about.trim() === "") {
+    errror.about = "about yourself required ";
+  } else {
+    const charCount = values.about.trim().length;
+    if (charCount > 200) {
+      errror.about = `characters limit exceeded (${charCount}/200)`;
     }
   }
 
   // 2. Gap Year Validation
-   
+
   if (values.gap) {
-    const gapWordCount = values.gap.trim().split(/\s+/).length;
-    if (gapWordCount > 200) {
-      errror.gap = `Word limit exceeded (${gapWordCount}/200)`;
+    const gapcharCount = values.gap.trim().length;
+    if (gapcharCount > 200) {
+      errror.gap = `characters limit exceeded (${gapcharCount}/200)`;
     }
   }
 
@@ -120,7 +151,7 @@ const Form = () => {
       country: "",
       dialcode: "+91",
       // code: "IN",
-      phone: "+91",
+      phone: "",
       pin: "",
       courses: "",
       marksheet10: false,
@@ -134,11 +165,30 @@ const Form = () => {
       state: "",
       bcacollgename: "",
       mcacollgename: "",
+      gradebca: "",
+      grademca: "",
+      ugccollege: "",
     },
     validation,
   );
 
   const [isDialCodeOpen, setIsDialCodeOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [mathing, setMatching] = useState([]);
+
+  const handleSearchTermChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (value.trim().length > 0) {
+      const filtered = Ugccollegedata.filter((item) =>
+        item.collegeName.toLowerCase().includes(value.toLowerCase()),
+      );
+      setMatching(filtered.slice(0, 3)); // limit to first 3 results
+    } else {
+      setMatching([]);
+    }
+  };
 
   const handleDialCode = (newCode) => {
     const oldCode = values.dialcode;
@@ -185,6 +235,11 @@ const Form = () => {
       });
     }
   };
+
+  //  const length = PhoneData.map((item) => item.length);
+  //     const minlength = Math.min(...length);
+  //     const maxlength = Math.max(...length);
+  //     console.log(minlength, maxlength);
 
   // display count for word max 200
   // const getWordCount = () => {
@@ -316,7 +371,7 @@ const Form = () => {
           <h2>Fill this details</h2>
 
           <form className="from-field" onSubmit={handleSubmit}>
-             {/* name section firstname , lastname  space not include  */}
+            {/* name section firstname , lastname  space not include  */}
             <div className="form-row">
               <InputField
                 label="Firstname Name "
@@ -360,8 +415,7 @@ const Form = () => {
               onBlur={handleblur}
             />
 
-
-          {/* dob section  */}
+            {/* dob section  */}
             <div className="form-row">
               <InputField
                 label="Date of Birth"
@@ -373,8 +427,7 @@ const Form = () => {
                 onBlur={handleblur}
               />
 
-
-            {/* gender section  */}
+              {/* gender section  */}
               <Radiogroup
                 label="gender"
                 name="gender"
@@ -385,9 +438,7 @@ const Form = () => {
               />
             </div>
 
-
-
-              {/* address and pin section  */}
+            {/* address and pin section  */}
             <div className="form-row">
               <InputField
                 label=" Adress:"
@@ -408,9 +459,6 @@ const Form = () => {
                 maxLength={6}
               />
             </div>
-
-
-
 
             {/* phone number section  */}
 
@@ -456,7 +504,6 @@ const Form = () => {
                             >
                               {item.flag}
                               {item.dial_code}
-                              {item.country}
                             </div>
                           ))}
                         </div>
@@ -479,8 +526,7 @@ const Form = () => {
               </div>
             </div>
 
-             
-           {/* documetn section  */}
+            {/* documetn section  */}
 
             <div className="form-row">
               <Checkbox
@@ -496,9 +542,7 @@ const Form = () => {
               />
             </div>
 
-
-
-           {/* text area about and gap year  */}
+            {/* text area about and gap year  */}
             <label>
               About Yourself:
               <div className="form-row">
@@ -508,10 +552,9 @@ const Form = () => {
                   onChange={handleChange}
                   onBlur={handleblur}
                   placeholder="Tell us about yourself..."
-                  maxWords={200}
+                  maxChar={200}
                   error={error.about}
                 />
-              
               </div>
             </label>
 
@@ -524,13 +567,11 @@ const Form = () => {
                   onChange={handleChange}
                   onBlur={handleblur}
                   placeholder="Explain your gap year (if any)..."
-                  maxWords={200}
+                  maxChar={200}
                   error={error.gap}
                 />
-                
               </div>
             </label>
-
 
             {/* radio nationality and state  */}
 
@@ -548,7 +589,7 @@ const Form = () => {
                 name="country"
                 value={values.country}
                 onChange={handleChange}
-                options={Countries} // Pass the entire list of countries
+                options={Countries}
                 placeholder="Select Country"
                 error={error.country}
               />
@@ -564,9 +605,7 @@ const Form = () => {
                 options={["MP", "other"]}
               />
 
-
-
-               {/*  state section  */}
+              {/*  state section  */}
               <SelectGroup
                 label="choose state if other :"
                 name="state"
@@ -585,14 +624,13 @@ const Form = () => {
                 name="courses"
                 value={values.courses}
                 onChange={handleChange}
-                options={courses} // Pass the entire list of courses
+                options={courses}
                 placeholder="Select Course"
                 error={error.courses}
               />
             </div>
 
-
-             {/* college name section  */}
+            {/* college name section  */}
             <label>
               Enter your coollege name-
               <div className="form-row">
@@ -617,6 +655,78 @@ const Form = () => {
               </div>
             </label>
 
+            <div className="form-group">
+              <label>Grade:</label>
+
+              <div className="grade-container">
+                <input
+                  className="gardelist"
+                  list="grade-list"
+                  name="gradebca"
+                  value={values.gradebca}
+                  onChange={handleChange}
+                  placeholder="Enter a Grade  BCA:"
+                />
+                <datalist id="grade-list">
+                  <option>+A</option>
+                  <option>A</option>
+                  <option>+B</option>
+                  <option>B</option>
+                  <option>C</option>
+                  <option>D</option>
+                  <option>F</option>
+                </datalist>
+
+                <input
+                  className="gardelist"
+                  list="grade-list"
+                  name="grademca"
+                  value={values.grademca}
+                  onChange={handleChange}
+                  placeholder="Enter a Grade MCA:"
+                />
+                <datalist id="grade-list">
+                  <option>+A</option>
+                  <option>A</option>
+                  <option>+B</option>
+                  <option>B</option>
+                  <option>C</option>
+                  <option>D</option>
+                  <option>F</option>
+                </datalist>
+              </div>
+
+              <div className="form-group">
+                <label>UGC Approved College Search:</label>
+                <div className="form-row">
+                  <input
+                    type="text"
+                    placeholder="search bar.."
+                    name="ugccollege"
+                    value={searchTerm}
+                    onChange={handleSearchTermChange}
+                  />
+                </div>
+                <ul>
+                  {mathing &&
+                    mathing.map((item, index) => {
+                      return (
+                        <li
+                          key={index}
+                          onClick={() => {
+                            searchTerm(item.collegeName);
+                          }}
+                          className={
+                            searchTerm === item.collegeName ? "selected" : ""
+                          }
+                        >
+                          {item.collegeName}
+                        </li>
+                      );
+                    })}
+                </ul>
+              </div>
+            </div>
             <button type="submit" className="submit-btn">
               Submit
             </button>

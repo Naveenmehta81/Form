@@ -1,49 +1,49 @@
-import React from 'react'
+import React from "react";
 
-const Textarea = ({name , value ,onChange , placeholder ,  maxWords = 200 , onBlur , error ,...props}) => {
-
-
-    const getWordCount = () =>{
-    if(!value) return 0 ; 
-     return value.
-                trim()
-       .split(/\s+/)
-      .filter((word) => word !== "").length;
-             }
+const Textarea = ({
+  name,
+  value,
+  onChange,
+  placeholder,
+  maxChar = 200,
+  onBlur,
+  error,
+  ...props
+}) => {
+  const getCharCount = () => {
+     return value ? value.length : 0; 
+  };
 
   return (
-    <div className='form-group'>
-        <textarea
-          className='textarea'
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder} 
-           onBlur={onBlur}
-          {...props}
-          rows="5"
-          style={{width:"100%" , padding:'8px'}}
-        ></textarea>
-  <div    
-          
-          style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
-        
+    <div className="form-group">
+      <textarea
+        className="textarea"
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        onBlur={onBlur}
+        {...props}
+        rows="5"
+        style={{ width: "100%", padding: "8px" }}
+      ></textarea>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "5px",
+        }}
+      >
         {/* 1. Error Message */}
-        <span style={{ color: "red", fontSize: "12px" }}>
-          {error}
-        </span>
+        <span style={{ color: "red", fontSize: "12px" }}>{error}</span>
 
         {/* 2. Word Count (Always Visible) */}
         <span style={{ fontSize: "12px", color: "#0c0404" }}>
-          {getWordCount()}/{maxWords} words
+          {getCharCount()}/{maxChar} characters
         </span>
-        
       </div>
-         
-      
     </div>
-  )
-}
+  );
+};
 
-export default Textarea ;
-
+export default Textarea;

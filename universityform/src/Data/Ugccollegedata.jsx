@@ -1,0 +1,25 @@
+ const Ugccollegedata = [
+  { "id": 1, "collegeName": "Birla Institute of Technology (BIT)", "city": "Mesra", "state": "Jharkhand", "type": "Private" },
+  { "id": 2, "collegeName": "IIT Delhi", "city": "New Delhi", "state": "Delhi", "type": "Government" },
+  { "id": 3, "collegeName": "School of Computer Science, DAVV", "city": "Indore", "state": "Madhya Pradesh", "type": "Government" },
+  { "id": 4, "collegeName": "Vellore Institute of Technology (VIT)", "city": "Vellore", "state": "Tamil Nadu", "type": "Private" },
+  { "id": 5, "collegeName": "Anna University", "city": "Chennai", "state": "Tamil Nadu", "type": "Government" },
+  { "id": 6, "collegeName": "Manipal Institute of Technology", "city": "Manipal", "state": "Karnataka", "type": "Private" },
+  { "id": 7, "collegeName": "Jadavpur University", "city": "Kolkata", "state": "West Bengal", "type": "Government" },
+  { "id": 8, "collegeName": "SRM Institute of Science", "city": "Chennai", "state": "Tamil Nadu", "type": "Private" },
+  { "id": 9, "collegeName": "HBTU Kanpur", "city": "Kanpur", "state": "Uttar Pradesh", "type": "Government" },
+  { "id": 10, "collegeName": "Thapar Institute of Engineering", "city": "Patiala", "state": "Punjab", "type": "Private" },
+  { "id": 11, "collegeName": "College of Engineering Pune (COEP)", "city": "Pune", "state": "Maharashtra", "type": "Government" },
+  { "id": 12, "collegeName": "Amity University", "city": "Noida", "state": "Uttar Pradesh", "type": "Private" },
+  { "id": 13, "collegeName": "Osmania University", "city": "Hyderabad", "state": "Telangana", "type": "Government" },
+  { "id": 14, "collegeName": "BITS Pilani", "city": "Pilani", "state": "Rajasthan", "type": "Private" },
+  { "id": 15, "collegeName": "NIT Trichy", "city": "Tiruchirappalli", "state": "Tamil Nadu", "type": "Government" },
+  { "id": 16, "collegeName": "Symbiosis Institute", "city": "Pune", "state": "Maharashtra", "type": "Private" },
+  { "id": 17, "collegeName": "Delhi Technological University (DTU)", "city": "New Delhi", "state": "Delhi", "type": "Government" },
+  { "id": 18, "collegeName": "Lovely Professional University (LPU)", "city": "Phagwara", "state": "Punjab", "type": "Private" },
+  { "id": 19, "collegeName": "Institute of Chemical Technology", "city": "Mumbai", "state": "Maharashtra", "type": "Government" },
+  { "id": 20, "collegeName": "Christ University", "city": "Bengaluru", "state": "Karnataka", "type": "Private" }
+]
+
+
+export default Ugccollegedata; 

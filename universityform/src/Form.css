@@ -13,7 +13,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; 
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .form-container {
@@ -90,7 +90,6 @@ label {
   font-size: 16px;
 }
 
-
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="date"],
@@ -153,16 +152,12 @@ label {
 
 .phone-input-box input {
   border-radius: 0 4px 4px 0;
-  border-left: 1px solid var(--border-color); 
+  border-left: 1px solid var(--border-color);
 }
-
-
 
 .phone-input-box .form-group label {
   display: none;
 }
-
-
 
 .custom-select-container {
   position: relative;
@@ -207,7 +202,6 @@ label {
   background-color: #f0f0f0;
 }
 
-
 /* Radio Group */
 .gender-lable {
   display: flex;
@@ -227,8 +221,7 @@ label {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-weight: 400; 
-  
+  font-weight: 400;
 }
 
 .gender-options input[type="radio"] {
@@ -274,9 +267,8 @@ label {
   cursor: pointer;
 }
 
-/* =========================================
-   7. BUTTONS
-   ========================================= */
+/* 7. BUTTONS */
+
 .submit-btn {
   width: 100%;
   margin-top: 20px;
@@ -301,4 +293,26 @@ label {
 
 .submit-btn:active {
   transform: translateY(0);
+}
+
+/* grade list */
+.grade-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Centers the label and input */
+  width: 100%;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.gardelist {
+  text-align: center;
+  font-size: 15px;
+  width: 50%;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  outline: none;
+  transition: border-color 0.2s;
 }
