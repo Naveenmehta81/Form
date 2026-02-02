@@ -7,14 +7,15 @@ const SelectGroup = ({
   onChange,
   options,
   placeholder,
-  error,
+  // error,
+  isOpen, 
+  onToggle
 }) => {
-  // 1. Internal state to handle open/close automatically
-  const [isOpen, setIsOpen] = useState(false);
 
-  // 2. Helper to send data back to Form.js
+  // 1. New state for the search text
+  const [searchTerm, setSearchTerm] = useState("");
+
   const handleSelect = (selectedValue) => {
-    // Create a fake event so your main handleChange works without changes
     const fakeEvent = {
       target: {
         name: name,
@@ -22,58 +23,72 @@ const SelectGroup = ({
       },
     };
 
-    onChange(fakeEvent); // Update the main form state
-    setIsOpen(false); // Close the dropdown immediately
+    onChange(fakeEvent);
+    onToggle();
+    setSearchTerm(""); // Reset search after selection
   };
 
-  // 3. Find the Label (e.g., turn "IN" into "India")
+  // 2. Filter logic: ignores case and matches label
+  const filteredOptions = options.filter((opt) =>
+    opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
     <div className="form-group">
       <label>{label}:</label>
-      
 
       <div className="custom-select-container">
         {/* The Trigger Box */}
-        <div className="select-trigger" onClick={() => setIsOpen(!isOpen)}>
+        <div className="select-trigger" onClick={onToggle}>
           {selectedOption ? selectedOption.label : placeholder}
+          <span className="arrow">{isOpen ? "▲" : "▼"}</span>
         </div>
 
         {/* The Dropdown List */}
         {isOpen && (
           <div className="options-list">
-            {options.map((option) => (
-              <div
-                key={option.value}
-                className="option-item"
-                onClick={() => handleSelect(option.value)}
-              >
-                {option.label}
-              </div>
-            ))}
+            {/* 3. The Search Bar Input */}
+            <div className="search-box-container">
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                autoFocus // Automatically focus when dropdown opens
+                onClick={(e) => e.stopPropagation()} // Prevents dropdown from closing when clicking input
+              />
+            </div>
+
+            {/* 4. Display Filtered Options */}
+            <div className="options-scroll-area">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`option-item ${value === option.value ? "selected" : ""}`}
+                    onClick={() => handleSelect(option.value)}
+                  >
+                    {option.label}
+                  </div>
+                ))
+              ) : (
+                <div className="no-results">No matches found</div>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <span
-          style={{
-            color: "red",
-            fontSize: "12px",
-            marginTop: "5px",
-            display: "block",
-          }}
-        >
-          {error}
-        </span>
-      )}
+      {/* {error && <span style={{ color: "red", fontSize: "12px" }}>{error}</span>} */}
     </div>
   );
 };
 
 export default SelectGroup;
+
 
 {
   /* <div className="form-input-number">

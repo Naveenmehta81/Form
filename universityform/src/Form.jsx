@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Form.css";
 import InputField from "./component/InputField"; // reusable componnet
 import Radiogroup from "./component/Radiogroup"; // resusable componet for radio
@@ -11,6 +11,7 @@ import Textarea from "./component/Textarea";
 import SelectGroup from "./component/SelectGroup";
 import States from "./Data/States";
 import Ugccollegedata from "./Data/Ugccollegedata";
+import useDebounce from "./Customhook/useDebounce"; // debounce hook
 
 const validation = (values) => {
   let errror = {};
@@ -87,9 +88,10 @@ const validation = (values) => {
         const length = PhoneData.map((item) => item.length);
         const minlength = Math.min(...length);
         const maxlength = Math.max(...length);
+
         if (
-          registernumber.length >= minlength ||
-          registernumber.length < maxlength
+          registernumber.length < minlength + 1 ||
+          registernumber.length > maxlength + 4
         ) {
           errror.phone = `Invalid phone number length. Must be between ${minlength} and ${maxlength} digits.`;
         }
@@ -118,8 +120,8 @@ const validation = (values) => {
 
   // nationlity & state
   if (!values.nation) errror.nation = "select nation";
-  if (!values.state) errror.state = "select state";
-  if (!values.country) errror.country = "select country";
+  // if (!values.state) errror.state = "select state";
+  // if (!values.country) errror.country = "select country";
   if (!values.courses) errror.courses = "select courses";
 
   // college verification
@@ -162,7 +164,7 @@ const Form = () => {
       about: "",
       gap: "",
       nation: "",
-      state: "",
+      state_mode: "",
       bcacollgename: "",
       mcacollgename: "",
       gradebca: "",
@@ -175,20 +177,31 @@ const Form = () => {
   const [isDialCodeOpen, setIsDialCodeOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [mathing, setMatching] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const debouncedSearch = useDebounce(searchTerm, 1000);
+
+  const toggleDropdown = (name) => {
+    // If clicking the one already open, close it (set to null)
+    // Otherwise, open the new one
+    setOpenDropdown(openDropdown === name ? null : name);
+  };
 
   const handleSearchTermChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
+    setSearchTerm(e.target.value);
+  };
 
-    if (value.trim().length > 0) {
+  useEffect(() => {
+    if (debouncedSearch.trim().length > 0) {
+      console.log("Searching DB for:", debouncedSearch); // Debug to prove it works
+
       const filtered = Ugccollegedata.filter((item) =>
-        item.collegeName.toLowerCase().includes(value.toLowerCase()),
+        item.collegeName.toLowerCase().includes(debouncedSearch.toLowerCase()),
       );
-      setMatching(filtered.slice(0, 3)); // limit to first 3 results
+      setMatching(filtered.slice(0, 3)); // Limit results
     } else {
       setMatching([]);
     }
-  };
+  }, [debouncedSearch]);
 
   const handleDialCode = (newCode) => {
     const oldCode = values.dialcode;
@@ -215,115 +228,47 @@ const Form = () => {
   );
 
   const handlephoneinput = (e) => {
-    const inputValue = e.target.value;
+    const { value } = e.target;
+
+    const inputValue = value.replace(/[^\d+]/g, ""); // Allow only numbers and '+'
+
+    const finalValue = inputValue.startsWith("+")
+      ? "+" + inputValue.slice(1).replace(/\+/g, "")
+      : inputValue.replace(/\+/g, "");
 
     // Check if the typed number starts with any known dial code
     const matchedCountry = sortedPhoneData.find((item) =>
       inputValue.startsWith(item.dial_code),
     );
 
+    let nextvalue = {
+      ...values,
+      phone: finalValue,
+    };
+
     if (matchedCountry) {
-      setValues({
-        ...values,
-        phone: inputValue,
-        dialcode: matchedCountry.dial_code,
-      });
-    } else {
-      setValues({
-        ...values,
-        phone: inputValue,
-      });
+      nextvalue.dialcode = matchedCountry.dial_code;
     }
+
+    setValues(nextvalue);
   };
-
-  //  const length = PhoneData.map((item) => item.length);
-  //     const minlength = Math.min(...length);
-  //     const maxlength = Math.max(...length);
-  //     console.log(minlength, maxlength);
-
-  // display count for word max 200
-  // const getWordCount = () => {
-  //   if (!formData.about) return 0;
-  //   return formData.about
-  //     .trim()
-  //     .split(/\s+/)
-  //     .filter((word) => word !== "").length;
-  // };
-
-  // // handle checkbox
-  // const handelcheckbox = (e) => {
-  //   const { name, checked } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: checked,
-  //   }));
-  // };
-
-  // handle phone number validation min 8 to 15
-  // const handlephonecodevalidation = (e) => {
-  //   const phonecode = e.target.value;
-  //   const formatecoderegex = /^[0-9\s\-\+]*$/;
-
-  //   if (!formatecoderegex.test(phonecode)) {
-  //     setPhoneCodeError("invalid error");
-  //     return;
-  //   }
-
-  //   const clearnumber = phonecode.replace(/[^0-9]/g, "");
-
-  //   if (clearnumber.length < 8 || clearnumber.length > 15) {
-  //     setPhoneCodeError("phone no must be  8 to 15 ");
-  //   } else {
-  //     setPhoneCodeError("");
-  //   }
-  // };
-
-  // const handleDialCode = (e) => {
-  //   const newcode = e.target.value;
-  //   const oldcode = formData.dialcode;
-  //   let currentphone = formData.phone;
-
-  //   if (currentphone.startsWith(oldcode)) {
-  //     currentphone = currentphone.substring(oldcode.length).trim();
-  //   }
-
-  //   setFormData({
-  //     ...formData,
-  //     dialcode: newcode,
-  //     phone: newcode + currentphone,
-  //   });
-  // };
-
-  //   const sortPhonedata = [...PhoneData].sort(
-  //   (a, b) => b.dial_code.length - a.dial_code.length, // soting longest to shortest
-  // );
-
-  // const handlephoneinput = (e) => {
-  //   // phone number ka change
-  //   const inputvalue = e.target.value;
-  //   const matchcontry = sortPhonedata.find((item) =>
-  //     inputvalue.startsWith(item.dial_code),
-  //   );
-
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     phone: inputvalue,
-  //     dialcode: matchcontry ? matchcontry.dial_code : prev.dialcode,
-  //   }));
-  // };
 
   // final sumbit handler
   const handleSubmit = (e) => {
     e.preventDefault();
     const validerrors = validation(values);
 
-    // --- START: DUPLICATE CHECK LOGIC ---
+    //  const finalErrors = { ...error, ...validErrors };
 
-    // 1. Get the list of students who ALREADY submitted
+    // setError(finalErrors);
+
+    // // --- START: DUPLICATE CHECK LOGIC ---
+
+    // // 1. Get the list of students who ALREADY submitted
     const existingData = localStorage.getItem("registered_students");
     const studentList = existingData ? JSON.parse(existingData) : [];
 
-    // 2. Check if current email exists in that list
+    // // 2. Check if current email exists in that list
     const isDuplicate = studentList.some(
       (student) => student.email === values.email,
     );
@@ -332,11 +277,13 @@ const Form = () => {
       // If found, add an error
       validerrors.email = "Data already present (Email registered)";
     }
-    // --- END: DUPLICATE CHECK LOGIC ---
+    // // --- END: DUPLICATE CHECK LOGIC ---
 
     setError(validerrors);
 
     if (Object.keys(validerrors).length === 0) {
+      const existingData = localStorage.getItem("registered_students");
+      const studentList = existingData ? JSON.parse(existingData) : [];
       // 3. Success! Add to the "Database"
       const newItem = {
         id: Date.now(),
@@ -352,16 +299,6 @@ const Form = () => {
       alert("Error in form");
     }
   };
-
-  // const validateName = (name, value) => {
-  //   if (!value.trim()) {
-  //     return `${name} is required`;
-  //   }
-  //   if (value.length < 3) {
-  //     return "Must be at least 3 characters";
-  //   }
-  //   return "";
-  // };
 
   return (
     <div className="form-container">
@@ -462,7 +399,10 @@ const Form = () => {
 
             {/* phone number section  */}
 
-            <div className="form-row">
+            <div
+              className="form-row"
+              style={{ zIndex: isDialCodeOpen ? 100 : 1 }}
+            >
               <div className="form-group">
                 <label>Phone Number</label>
 
@@ -575,7 +515,9 @@ const Form = () => {
 
             {/* radio nationality and state  */}
 
-            <div className="form-row">
+            <div
+              className={`form-row ${openDropdown === "country" ? "active-row" : ""}`}
+            >
               <Radiogroup
                 label="Nationality"
                 name="nation"
@@ -584,40 +526,58 @@ const Form = () => {
                 error={error.nation}
                 options={["India", "Nepal", "other"]}
               />
-              <SelectGroup
-                label="Country if other "
-                name="country"
-                value={values.country}
-                onChange={handleChange}
-                options={Countries}
-                placeholder="Select Country"
-                error={error.country}
-              />
+
+              {values.nation === "other" && (
+                <div className="fade-in-field" style={{ flex: 1 }}>
+                  <SelectGroup
+                    label="Country if other "
+                    name="country"
+                    value={values.country}
+                    onChange={handleChange}
+                    options={Countries}
+                    placeholder="Select Country"
+                    // error={error.country}
+                    // 3. PASS CONTROL PROPS
+                    isOpen={openDropdown === "country"} // Is this one open?
+                    onToggle={() => toggleDropdown("country")} // Function to click
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="form-row">
+            <div
+              className={`form-row ${openDropdown === "state" ? "active-row" : ""}`}
+            >
               <Radiogroup
                 label="state"
-                name="state"
-                value={values.state}
+                name="state_mode"
+                value={values.state_mode}
                 onChange={handleChange}
-                error={error.state}
+                error={error.state_mode}
                 options={["MP", "other"]}
               />
 
               {/*  state section  */}
-              <SelectGroup
-                label="choose state if other :"
-                name="state"
-                value={values.state}
-                onChange={handleChange}
-                options={States}
-                placeholder="Select State"
-                error={error.state}
-              />
+              {values.state_mode === "other" && (
+                <div className="fade-in-field" style={{ flex: 1 }}>
+                  <SelectGroup
+                    label="choose state if other :"
+                    name="state"
+                    value={values.state}
+                    onChange={handleChange}
+                    options={States}
+                    placeholder="Select State"
+                    // error={error.state}
+                    isOpen={openDropdown === "state"}
+                    onToggle={() => toggleDropdown("state")}
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="form-row">
+            <div
+              className={`form-row ${openDropdown === "courses" ? "active-row" : ""}`}
+            >
               {/* 2. Course Select */}
               <SelectGroup
                 label="Courses"
@@ -627,6 +587,8 @@ const Form = () => {
                 options={courses}
                 placeholder="Select Course"
                 error={error.courses}
+                isOpen={openDropdown === "courses"}
+                onToggle={() => toggleDropdown("courses")}
               />
             </div>
 

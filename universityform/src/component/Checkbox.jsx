@@ -1,33 +1,31 @@
 import React from "react";
 
-const Checkbox = ({legend, onChange, option, value}) => {
+const Checkbox = ({ legend, onChange, option, value }) => {
   return (
     <div className="form-group">
-      <fieldset className="doucment-fieldset">
-        <legend>{legend}</legend>
-        <div className="checkbox-group">
-          {option.map((option) => (
-            <label key={option.name} className="checkbox-label">
-              <input
-                type="checkbox"
-                name={option.name}
-                onChange={onChange}
-                checked={value[option.name] || false}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      {/* <fieldset className="doucment-fieldset"> */}
+      <legend>{legend}</legend>
+      <div className="checkbox-group">
+        {option.map((option) => (
+          <label key={option.name} className="checkbox-label">
+            <input
+              type="checkbox"
+              name={option.name}
+              onChange={onChange}
+              checked={value[option.name] || false}
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
+      {/* </fieldset> */}
     </div>
   );
 };
 
 export default Checkbox;
 
-
-
-  // make this code reusable and optimized 
+// make this code reusable and optimized
 
 //  <div className="form-row">
 //               <div className="form-group">
@@ -77,4 +75,4 @@ export default Checkbox;
 //                   </div>
 //                 </fieldset>
 //               </div>
-//             </div> 
+//             </div>

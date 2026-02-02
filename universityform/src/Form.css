@@ -73,8 +73,14 @@
 /* Grid System for Rows */
 .form-row {
   display: flex;
+  flex-direction: row;
   gap: 20px;
   width: 100%;
+  position: relative; /* Necessary for z-index */
+  z-index: 1; /* Base layer */
+}
+.active-row {
+  z-index: 500 !important;
 }
 
 .form-group {
@@ -138,6 +144,8 @@ label {
 .phone-dialcode {
   width: 110px !important;
   flex-shrink: 0;
+  position: relative; /* z-index won't work without this! */
+  z-index: 50; /* Higher than the input box */
 }
 
 .phone-dialcode .select-trigger {
@@ -148,6 +156,8 @@ label {
 /* The Number Input Box */
 .phone-input-box {
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .phone-input-box input {
@@ -168,7 +178,7 @@ label {
   width: 100%;
   padding: 0 15px;
   border: 1px solid var(--border-color);
-  background: white;
+  background: rgb(255, 255, 255);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -185,7 +195,7 @@ label {
   background: white;
   border: 1px solid var(--border-color);
   border-top: none;
-  z-index: 1000;
+  z-index: 10;
   max-height: 200px;
   overflow-y: auto;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -234,39 +244,67 @@ label {
 
 /* Checkbox Group */
 .document-fieldset {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 15px 20px;
-  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 2px;
+  padding: 20px;
+  background-color: #fcfcfc; /* Slightly different bg to stand out */
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.document-fieldset:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .document-fieldset legend {
-  padding: 0 10px;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* Grid Layout for Checkboxes */
 .checkbox-group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(180px, 1fr)
+  ); /* Responsive Grid */
   gap: 15px;
+  margin-top: 10px;
 }
 
+/* The Individual Checkbox Item */
 .checkbox-label {
   display: flex;
   align-items: center;
+  padding: 10px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 15px;
+  transition: all 0.2s;
+  user-select: none;
 }
 
+.checkbox-label:hover {
+  background-color: #f0f8ff; /* Light blue on hover */
+  border-color: var(--accent-color);
+}
+
+/* Styling the actual box */
 .checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
   accent-color: var(--accent-color);
   cursor: pointer;
 }
-
 /* 7. BUTTONS */
 
 .submit-btn {
@@ -315,4 +353,54 @@ label {
   background-color: white;
   outline: none;
   transition: border-color 0.2s;
+}
+
+.search-box-container {
+  padding: 8px;
+  background: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #eee;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+}
+
+.options-scroll-area {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.no-results {
+  padding: 15px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-field {
+  animation: slideDown 0.3s ease-out forwards;
+  width: 100%;
 }
