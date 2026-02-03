@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import "./Form.css";
 import InputField from "./component/InputField"; // reusable componnet
 import Radiogroup from "./component/Radiogroup"; // resusable componet for radio
@@ -60,8 +61,8 @@ const validation = (values) => {
 
   if (!values.address) {
     errror.address = "address required ";
-  } else if (values.address.length < 10) {
-    errror.address = "address  must be at least 10 characters";
+  } else if (values.address.trim().length < 10 || values.address.trim().length > 50) {
+    errror.address = "address  must be at least 10 characters and max 50";
   }
 
   //pin
@@ -91,7 +92,7 @@ const validation = (values) => {
 
         if (
           registernumber.length < minlength + 1 ||
-          registernumber.length > maxlength + 4
+          registernumber.length > maxlength + 3
         ) {
           errror.phone = `Invalid phone number length. Must be between ${minlength} and ${maxlength} digits.`;
         }
@@ -120,7 +121,7 @@ const validation = (values) => {
 
   // nationlity & state
   if (!values.nation) errror.nation = "select nation";
-  // if (!values.state) errror.state = "select state";
+  if (!values.state_mode) errror.state_mode = "select state";
   // if (!values.country) errror.country = "select country";
   if (!values.courses) errror.courses = "select courses";
 
@@ -164,7 +165,7 @@ const Form = () => {
       about: "",
       gap: "",
       nation: "",
-      state_mode: "",
+      state_mode:"",
       bcacollgename: "",
       mcacollgename: "",
       gradebca: "",
@@ -187,7 +188,10 @@ const Form = () => {
   };
 
   const handleSearchTermChange = (e) => {
-    setSearchTerm(e.target.value);
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    setValues((prev) => ({ ...prev, ugccollege: "" })); // Clear selected college when search term changes
   };
 
   useEffect(() => {
@@ -250,55 +254,92 @@ const Form = () => {
       nextvalue.dialcode = matchedCountry.dial_code;
     }
 
-    setValues(nextvalue);
+     setValues(nextvalue);
   };
-
-  // final sumbit handler
+   
+  
   const handleSubmit = (e) => {
+     console.log("Submitting form with values:", values); // Debug log
     e.preventDefault();
-    const validerrors = validation(values);
 
-    //  const finalErrors = { ...error, ...validErrors };
 
-    // setError(finalErrors);
-
-    // // --- START: DUPLICATE CHECK LOGIC ---
-
-    // // 1. Get the list of students who ALREADY submitted
-    const existingData = localStorage.getItem("registered_students");
-    const studentList = existingData ? JSON.parse(existingData) : [];
-
-    // // 2. Check if current email exists in that list
-    const isDuplicate = studentList.some(
-      (student) => student.email === values.email,
-    );
-
-    if (isDuplicate) {
-      // If found, add an error
-      validerrors.email = "Data already present (Email registered)";
-    }
-    // // --- END: DUPLICATE CHECK LOGIC ---
-
+     const validerrors = validation(values);
     setError(validerrors);
 
-    if (Object.keys(validerrors).length === 0) {
-      const existingData = localStorage.getItem("registered_students");
-      const studentList = existingData ? JSON.parse(existingData) : [];
-      // 3. Success! Add to the "Database"
-      const newItem = {
-        id: Date.now(),
-        ...values,
-      };
-      const updatedItems = [...studentList, newItem];
-      localStorage.setItem("registered_students", JSON.stringify(updatedItems));
 
-      console.log("Success data added");
-      alert("Form Submitted Successfully");
-      clearForm();
-    } else {
-      alert("Error in form");
-    }
-  };
+    if(Object.keys(validerrors).length ===0){
+       fetch("http://localhost:8000/collegestudent", {
+        method: "POST", // You must specify the method here
+        headers: {
+          "Content-Type": "application/json", // Tell server you are sending JSON
+        },
+        body: JSON.stringify(values), 
+         // Debug log
+      })
+      .then((res) => {
+        if (res.ok) {
+           console.log("Success data added");
+           alert("Form Submitted Successfully");
+           clearForm();
+        } else {
+           alert("Server Error: Failed to save");
+        }
+      })
+      .catch((err) => {
+        console.error("Connection Failed:", err);
+        alert("Error: Is json-server running on port 8000?");
+      });
+  }
+};
+          
+ 
+
+  // // final sumbit handler
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   const validerrors = validation(values);
+
+  //   //  const finalErrors = { ...error, ...validErrors };
+
+  //   // setError(finalErrors);
+
+  //   // // --- START: DUPLICATE CHECK LOGIC ---
+
+  //   // // 1. Get the list of students who ALREADY submitted
+  //   const existingData = localStorage.getItem("registered_students");
+  //   const studentList = existingData ? JSON.parse(existingData) : [];
+
+  //   // // 2. Check if current email exists in that list
+  //   const isDuplicate = studentList.some(
+  //     (student) => student.email === values.email,
+  //   );
+
+  //   if (isDuplicate) {
+  //     // If found, add an error
+  //     validerrors.email = "Data already present (Email registered)";
+  //   }
+  //   // // --- END: DUPLICATE CHECK LOGIC ---
+
+  //   setError(validerrors);
+
+  //   if (Object.keys(validerrors).length === 0) {
+  //     const existingData = localStorage.getItem("registered_students");
+  //     const studentList = existingData ? JSON.parse(existingData) : [];
+  //     // 3. Success! Add to the "Database"
+  //     const newItem = {
+  //       id: Date.now(),
+  //       ...values,
+  //     };
+  //     const updatedItems = [...studentList, newItem];
+  //     localStorage.setItem("registered_students", JSON.stringify(updatedItems));
+
+  //     console.log("Success data added");
+  //     alert("Form Submitted Successfully");
+  //     clearForm();
+  //   } else {
+  //     alert("Error in form");
+  //   }
+  // };
 
   return (
     <div className="form-container">
@@ -627,8 +668,10 @@ const Form = () => {
                   name="gradebca"
                   value={values.gradebca}
                   onChange={handleChange}
+                  error={error.gradebca}
                   placeholder="Enter a Grade  BCA:"
                 />
+
                 <datalist id="grade-list">
                   <option>+A</option>
                   <option>A</option>
@@ -645,8 +688,10 @@ const Form = () => {
                   name="grademca"
                   value={values.grademca}
                   onChange={handleChange}
+                  error={error.grademca}
                   placeholder="Enter a Grade MCA:"
                 />
+
                 <datalist id="grade-list">
                   <option>+A</option>
                   <option>A</option>
@@ -676,7 +721,15 @@ const Form = () => {
                         <li
                           key={index}
                           onClick={() => {
-                            searchTerm(item.collegeName);
+                            setSearchTerm(item.collegeName); //ubdate ui search bar
+
+                            setValues({
+                              // update form data
+                              ...values,
+                              ugccollege: item.collegeName,
+                            });
+
+                            setMatching([]); // close dropdown
                           }}
                           className={
                             searchTerm === item.collegeName ? "selected" : ""
@@ -692,7 +745,15 @@ const Form = () => {
             <button type="submit" className="submit-btn">
               Submit
             </button>
+            <button>
+                 Edit in data 
+            </button>
+            <button>
+                Delete 
+            </button>
+             
           </form>
+
         </div>
       </div>
     </div>
