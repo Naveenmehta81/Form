@@ -310,6 +310,7 @@ label {
 .submit-btn {
   width: 100%;
   margin-top: 20px;
+  margin-bottom: 20px;
   padding: 15px;
   background: var(--primary-color);
   color: white;

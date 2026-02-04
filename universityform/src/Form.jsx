@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import React, { useState, useEffect, use } from "react";
+import axios from "axios";
 import "./Form.css";
 import InputField from "./component/InputField"; // reusable componnet
 import Radiogroup from "./component/Radiogroup"; // resusable componet for radio
@@ -13,6 +13,7 @@ import SelectGroup from "./component/SelectGroup";
 import States from "./Data/States";
 import Ugccollegedata from "./Data/Ugccollegedata";
 import useDebounce from "./Customhook/useDebounce"; // debounce hook
+import Rgistredstudent from "./component/Rgistredstudent";
 
 const validation = (values) => {
   let errror = {};
@@ -61,7 +62,10 @@ const validation = (values) => {
 
   if (!values.address) {
     errror.address = "address required ";
-  } else if (values.address.trim().length < 10 || values.address.trim().length > 50) {
+  } else if (
+    values.address.trim().length < 10 ||
+    values.address.trim().length > 50
+  ) {
     errror.address = "address  must be at least 10 characters and max 50";
   }
 
@@ -165,7 +169,7 @@ const Form = () => {
       about: "",
       gap: "",
       nation: "",
-      state_mode:"",
+      state_mode: "",
       bcacollgename: "",
       mcacollgename: "",
       gradebca: "",
@@ -180,6 +184,25 @@ const Form = () => {
   const [mathing, setMatching] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const debouncedSearch = useDebounce(searchTerm, 1000);
+  const [resgisteredData, setRegisteredData] = useState([]);
+
+  useEffect(() => { 
+    // Fetch registered students data from server on component mount
+             const data =  fetch ("http://localhost:8000/collegestudent")
+            .then((res) => res.json()) 
+            .then((data) => {
+              setRegisteredData(data);
+            })
+            .catch((error) => {
+              console.error("Error fetching registered students data:", error);
+            });
+  }, []);
+
+
+
+      
+            
+  
 
   const toggleDropdown = (name) => {
     // If clicking the one already open, close it (set to null)
@@ -254,45 +277,78 @@ const Form = () => {
       nextvalue.dialcode = matchedCountry.dial_code;
     }
 
-     setValues(nextvalue);
+    setValues(nextvalue);
   };
-   
-  
-  const handleSubmit = (e) => {
-     console.log("Submitting form with values:", values); // Debug log
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Submitting form with values:", values);
 
+    // 1 ager validtion hi wrong h then hu ruk jao
+    const validerrors = validation(values);
+    if (Object.keys(validerrors).length !== 0) {
+      // chekc validation if then stop here
+      setError(validerrors);
+      return;
+    }
 
-     const validerrors = validation(values);
-    setError(validerrors);
+    // 2 ager validation shai h then check dulication in server
+    try {
+      // DUPLICATE CHECK LOGIC
+      // email check kr rha hu
+      const emilcheck = await fetch(
+        `http://localhost:8000/collegestudent?email=${encodeURIComponent(values.email)}`,
+      );
+      const existingemail = await emilcheck.json();
 
+      // also check phone number
+      const phonecheck = await fetch(
+        `http://localhost:8000/collegestudent?phone=${encodeURIComponent(values.phone)}`,
+      );
+      const existingPhoneNumbers = await phonecheck.json();
 
-    if(Object.keys(validerrors).length ===0){
-       fetch("http://localhost:8000/collegestudent", {
-        method: "POST", // You must specify the method here
+      let severserror = {};
+
+      if (existingemail.length > 0) {
+        severserror.email = "Data already present (Email registered)";
+      }
+      if (existingPhoneNumbers.length > 0) {
+        severserror.phone = "Data already present (Phone Number registered)";
+      }
+
+      // now if data hai then set error data send nhi hoga server pr
+
+      if (Object.keys(severserror).length > 0) {
+        setError(severserror);    
+        alert("duplicate data found in server");
+        return; // stop here
+      }
+
+      // now if all good and not duplicate the send data post method
+      const response = await fetch("http://localhost:8000/collegestudent", {
+        method: "POST",
         headers: {
-          "Content-Type": "application/json", // Tell server you are sending JSON
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(values), 
-         // Debug log
-      })
-      .then((res) => {
-        if (res.ok) {
-           console.log("Success data added");
-           alert("Form Submitted Successfully");
-           clearForm();
-        } else {
-           alert("Server Error: Failed to save");
-        }
-      })
-      .catch((err) => {
-        console.error("Connection Failed:", err);
-        alert("Error: Is json-server running on port 8000?");
+        body: JSON.stringify(values),
       });
-  }
-};
-          
- 
+      if (response.ok) {
+        console.log("Success data added to server", values);
+        alert("Form Submitted Successfully");
+        clearForm();
+      } else {
+        alert("Error in form submission");
+      }
+    } catch (error) {
+      console.error("Error during form submission:", error);
+      alert(
+        "An error occurred during form submission. Please try again later.",
+      );
+    }
+  };
+
+
+
 
   // // final sumbit handler
   // const handleSubmit = (e) => {
@@ -745,15 +801,15 @@ const Form = () => {
             <button type="submit" className="submit-btn">
               Submit
             </button>
-            <button>
-                 Edit in data 
-            </button>
-            <button>
-                Delete 
-            </button>
-             
+           
           </form>
 
+          <section>
+                  <Rgistredstudent
+                       resgisteredData = {resgisteredData}
+                       setRegisteredData = {setRegisteredData}
+                   />
+          </section>
         </div>
       </div>
     </div>
