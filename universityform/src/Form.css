@@ -28,8 +28,8 @@
 
 .form-box {
   background-color: var(--card-bg);
-  width: 100%;
-  max-width: 750px;
+  width: 200%;
+  max-width: 950px;
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -390,6 +390,7 @@ label {
   font-size: 14px;
 }
 
+
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -405,3 +406,4 @@ label {
   animation: slideDown 0.3s ease-out forwards;
   width: 100%;
 }
+

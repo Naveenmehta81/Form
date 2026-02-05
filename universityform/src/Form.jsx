@@ -185,24 +185,40 @@ const Form = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const debouncedSearch = useDebounce(searchTerm, 1000);
   const [resgisteredData, setRegisteredData] = useState([]);
+  const [datatoedit, setDataToEdit] = useState(null);
 
-  useEffect(() => { 
+  useEffect(() => {
     // Fetch registered students data from server on component mount
-             const data =  fetch ("http://localhost:8000/collegestudent")
-            .then((res) => res.json()) 
-            .then((data) => {
-              setRegisteredData(data);
-            })
-            .catch((error) => {
-              console.error("Error fetching registered students data:", error);
-            });
+    fetch("http://localhost:8000/collegestudent")
+      .then((res) => res.json())
+      .then((data) => {
+        setRegisteredData(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching registered students data:", error);
+      });
   }, []);
 
+  const deletestudentdata = (id) => {
+    fetch(`http://localhost:8000/collegestudent/${id}`, {
+      method: `DELETE`,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setRegisteredData(data);
+      });
+  };
 
+  const handleEdit = (student) => {
+    setDataToEdit(student); // Save the student data to state
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll up to the form
+  };
 
-      
-            
-  
+  useEffect(() => {
+    if (datatoedit) {
+      setValues(datatoedit);
+    }
+  }, [datatoedit, setValues]);
 
   const toggleDropdown = (name) => {
     // If clicking the one already open, close it (set to null)
@@ -282,6 +298,7 @@ const Form = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     console.log("Submitting form with values:", values);
 
     // 1 ager validtion hi wrong h then hu ruk jao
@@ -308,47 +325,69 @@ const Form = () => {
       const existingPhoneNumbers = await phonecheck.json();
 
       let severserror = {};
+          
+      // if we edit then it check 
+         const emailTaken = existingemail.some(user => datatoedit ? user.id !== datatoedit.id : true);
+         const phoneTaken = existingPhoneNumbers.some(user => datatoedit ? user.id !== datatoedit.id : true);
 
-      if (existingemail.length > 0) {
+      if (existingemail.length > 0 && emailTaken) {
         severserror.email = "Data already present (Email registered)";
       }
-      if (existingPhoneNumbers.length > 0) {
+      if (existingPhoneNumbers.length > 0 && phoneTaken)  {
         severserror.phone = "Data already present (Phone Number registered)";
       }
 
       // now if data hai then set error data send nhi hoga server pr
 
       if (Object.keys(severserror).length > 0) {
-        setError(severserror);    
+        setError(severserror);
         alert("duplicate data found in server");
         return; // stop here
       }
 
-      // now if all good and not duplicate the send data post method
-      const response = await fetch("http://localhost:8000/collegestudent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-      if (response.ok) {
-        console.log("Success data added to server", values);
-        alert("Form Submitted Successfully");
-        clearForm();
+      if (datatoedit) {
+        const editresponse = await fetch(
+          `http://localhost:8000/collegestudent/${datatoedit.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(values),
+          },
+        ).then((res) => {
+          if (res.ok) {
+            alert("Updated Successfully!");
+            clearForm();
+            setDataToEdit(null); // Turn off Edit Mode
+          }
+        });
       } else {
-        alert("Error in form submission");
+        // now if all good and not duplicate the send data post method
+        try {
+          const response = await fetch("http://localhost:8000/collegestudent", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(values),
+          });
+          if (response.ok) {
+            console.log("Success data added to server", values);
+            alert("Form Submitted Successfully");
+            clearForm();
+          } else {
+            alert("Error in form submission");
+          }
+        } catch (error) {
+          console.error("Error during form submission:", error);
+          alert(
+            "An error occurred during form submission. Please try again later.",
+          );
+        }
       }
     } catch (error) {
-      console.error("Error during form submission:", error);
-      alert(
-        "An error occurred during form submission. Please try again later.",
-      );
+      console.log(" found  errror ", error);
     }
   };
-
-
-
 
   // // final sumbit handler
   // const handleSubmit = (e) => {
@@ -801,14 +840,14 @@ const Form = () => {
             <button type="submit" className="submit-btn">
               Submit
             </button>
-           
           </form>
 
-          <section>
-                  <Rgistredstudent
-                       resgisteredData = {resgisteredData}
-                       setRegisteredData = {setRegisteredData}
-                   />
+          <section className="table-section">
+            <Rgistredstudent
+              resgisteredData={resgisteredData}
+              deletestudentdata={deletestudentdata}
+              onEdit={handleEdit}
+            />
           </section>
         </div>
       </div>

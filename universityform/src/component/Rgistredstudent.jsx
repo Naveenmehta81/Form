@@ -1,6 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import './Table.css' ;
 
-const Rgistredstudent = ({ resgisteredData, onEdit, onDelete }) => {
+const Rgistredstudent = ({ resgisteredData, onEdit, deletestudentdata }) => {
+  // const [currentpage, setCurrentpage] = useState(1);
+  // const [totapage, setTotalpage] = useState(0);
+
+  // const limit = 2;
+  // const total = 5 ;
+
+  // useEffect(() => {
+  //   const skip = (currentpage - 1) * limit;
+  //   fetch(`http://localhost:8000/collegestudent/?limit=${limit}&skip=${skip}`)
+  //     .then((res) => res.json())
+  //      .catch((err) => console.log("error call for api ", err));
+  // }, [currentpage]);
+
   return (
     <div className="table-container">
       <h1 className="table-title">Registered Students Database</h1>
@@ -32,13 +46,15 @@ const Rgistredstudent = ({ resgisteredData, onEdit, onDelete }) => {
                     className="btn edit-btn"
                     onClick={() => onEdit && onEdit(student)} // Call parent edit function
                   >
-                     Edit
+                    Edit
                   </button>
                   <button
                     className="btn delete-btn"
-                    onClick={() => onDelete && onDelete(student.id)} // Call parent delete function
+                    onClick={() =>
+                      deletestudentdata && deletestudentdata(student.id)
+                    } // Call parent delete function
                   >
-                     Delete
+                    Delete
                   </button>
                 </td>
               </tr>
@@ -48,6 +64,26 @@ const Rgistredstudent = ({ resgisteredData, onEdit, onDelete }) => {
       ) : (
         <p className="no-data">No students registered yet.</p>
       )}
+      {/* <div>
+        <button
+          onClick={() => setCurrentpage((prev) => prev - 1)}
+          disabled={currentpage === 1}
+        >
+          Back
+        </button>
+        {[...Array(totapage)].map((_, i) => (
+          <button key={i} onClick={() => setCurrentpage(i + 1)}>
+            {i + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={() => setCurrentpage((prev) => prev + 1)}
+          disabled={currentpage === totapage}
+        >
+          Next
+        </button>
+      </div> */}
     </div>
   );
 };

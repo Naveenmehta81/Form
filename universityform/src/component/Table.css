@@ -1,92 +1,132 @@
-
+/* Container Styling */
 .table-container {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: 40px auto;  
+  padding: 30px;
+  background: #ffffff;
+  overflow-y: scroll;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+/* Title Styling */
 .table-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 30px;
   text-align: center;
-  color: #333;
-  margin-bottom: 20px;
-  font-family: 'Arial', sans-serif;
+  letter-spacing: -0.5px;
 }
 
-
+/* Table Styling */
 .student-table {
   width: 100%;
-  border-collapse: collapse; /* Removes gap between borders */
-  font-family: 'Arial', sans-serif;
-  background-color: white;
+  border-collapse: collapse;
+  background: #fff;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
-/* Header Row */
 .student-table thead {
-  background-color: #007bff; /* Blue Header */
-  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
 }
 
-.student-table th {
-  padding: 12px 15px;
+.student-table thead tr th {
+  padding: 16px 12px;
   text-align: left;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Data Rows */
-.student-table td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #ddd;
-  color: #555;
+.student-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
 }
 
-/* Zebra Striping (Alternating row colors) */
-.student-table tbody tr:nth-child(even) {
-  background-color: #f3f3f3;
-}
-
-/* Hover Effect */
 .student-table tbody tr:hover {
-  background-color: #e9ecef;
+  background-color: #f7fafc;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* BUTTON STYLES */
+.student-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.student-table tbody td {
+  padding: 14px 12px;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.student-table tbody td:first-child {
+  font-weight: 600;
+  color: #667eea;
+}
+
+/* Action Buttons Container */
 .action-buttons {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
+/* Button Base Styling */
 .btn {
-  padding: 6px 12px;
+   
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* Edit Button */
 .edit-btn {
-  background-color: #ffc107; /* Yellow */
-  color: #333;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
 }
 
 .edit-btn:hover {
-  background-color: #e0a800;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 }
 
+.edit-btn:active {
+  transform: translateY(0);
+}
+
+/* Delete Button */
 .delete-btn {
-  background-color: #dc3545; /* Red */
-  color: white;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
 }
 
 .delete-btn:hover {
-  background-color: #c82333;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
+.delete-btn:active {
+  transform: translateY(0);
+}
+
+/* No Data Message */
 .no-data {
   text-align: center;
-  color: #777;
-  font-size: 18px;
+  padding: 60px 20px;
+  color: #718096;
+  font-size: 16px;
+  font-weight: 500;
 }
+
