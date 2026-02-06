@@ -14,6 +14,8 @@ import States from "./Data/States";
 import Ugccollegedata from "./Data/Ugccollegedata";
 import useDebounce from "./Customhook/useDebounce"; // debounce hook
 import Rgistredstudent from "./component/Rgistredstudent";
+import db from "./db/db.js";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const validation = (values) => {
   let errror = {};
@@ -136,6 +138,8 @@ const validation = (values) => {
   return errror;
 };
 
+const { student } = db;
+
 const Form = () => {
   const {
     values,
@@ -179,52 +183,54 @@ const Form = () => {
     validation,
   );
 
+
+
   const [isDialCodeOpen, setIsDialCodeOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [mathing, setMatching] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const debouncedSearch = useDebounce(searchTerm, 1000);
-  const [resgisteredData, setRegisteredData] = useState([]);
+  // const [resgisteredData, setRegisteredData] = useState([]);
   const [datatoedit, setDataToEdit] = useState(null);
+ 
 
-  useEffect(() => {
-    // Fetch registered students data from server on component mount
-    fetch("http://localhost:8000/collegestudent")
-      .then((res) => res.json())
-      .then((data) => {
-        setRegisteredData(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching registered students data:", error);
-      });
-  }, []);
+  const resgisteredData = useLiveQuery(() => db.student.toArray(), []);
+  
+ 
 
-  const deletestudentdata = (id) => {
-    fetch(`http://localhost:8000/collegestudent/${id}`, {
-      method: `DELETE`,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setRegisteredData(data);
-      });
+
+
+
+
+
+  // --- 2. DELETE FUNCTION (DEXIE) ---
+  const deletestudentdata = async (id) => {
+    if(window.confirm("Are you sure you want to delete?")){
+      await db.student.delete(id);
+      
+    }
   };
 
+
+  // --- 3. EDIT HANDLER ---
   const handleEdit = (student) => {
-    setDataToEdit(student); // Save the student data to state
-    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll up to the form
+    setDataToEdit(student);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+
+  // Populate form when editing
   useEffect(() => {
     if (datatoedit) {
       setValues(datatoedit);
     }
   }, [datatoedit, setValues]);
 
+  // --- UI HANDLERS (Dropdowns, Search, Phone) ---
   const toggleDropdown = (name) => {
-    // If clicking the one already open, close it (set to null)
-    // Otherwise, open the new one
     setOpenDropdown(openDropdown === name ? null : name);
   };
+ 
 
   const handleSearchTermChange = (e) => {
     const value = e.target.value;
@@ -298,94 +304,58 @@ const Form = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("sumiited the data ", values);
 
-    console.log("Submitting form with values:", values);
-
-    // 1 ager validtion hi wrong h then hu ruk jao
     const validerrors = validation(values);
     if (Object.keys(validerrors).length !== 0) {
-      // chekc validation if then stop here
       setError(validerrors);
       return;
     }
 
-    // 2 ager validation shai h then check dulication in server
     try {
-      // DUPLICATE CHECK LOGIC
-      // email check kr rha hu
-      const emilcheck = await fetch(
-        `http://localhost:8000/collegestudent?email=${encodeURIComponent(values.email)}`,
-      );
-      const existingemail = await emilcheck.json();
+      const existingemail = await db.student.
+      where("email").equals(values.email).toArray();
 
-      // also check phone number
-      const phonecheck = await fetch(
-        `http://localhost:8000/collegestudent?phone=${encodeURIComponent(values.phone)}`,
-      );
-      const existingPhoneNumbers = await phonecheck.json();
+      const existphonenumber = await db.student.
+      where("phone").equals(values.phone).toArray();
+      
+      let serverErrors = {};
 
-      let severserror = {};
-          
-      // if we edit then it check 
-         const emailTaken = existingemail.some(user => datatoedit ? user.id !== datatoedit.id : true);
-         const phoneTaken = existingPhoneNumbers.some(user => datatoedit ? user.id !== datatoedit.id : true);
+      const emailTaken = existingemail.some((user) =>
+        datatoedit ? user.id !== datatoedit.id : true
+      );
+      const phoneTaken = existphonenumber.some((user) =>
+        datatoedit ? user.id !== datatoedit.id : true
+      );
 
       if (existingemail.length > 0 && emailTaken) {
-        severserror.email = "Data already present (Email registered)";
+        serverErrors.email = "Email already registered!";
       }
-      if (existingPhoneNumbers.length > 0 && phoneTaken)  {
-        severserror.phone = "Data already present (Phone Number registered)";
-      }
-
-      // now if data hai then set error data send nhi hoga server pr
-
-      if (Object.keys(severserror).length > 0) {
-        setError(severserror);
-        alert("duplicate data found in server");
-        return; // stop here
+      if (existphonenumber.length > 0 && phoneTaken) {
+        serverErrors.phone = "Phone number already registered!";
       }
 
-      if (datatoedit) {
-        const editresponse = await fetch(
-          `http://localhost:8000/collegestudent/${datatoedit.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-          },
-        ).then((res) => {
-          if (res.ok) {
-            alert("Updated Successfully!");
-            clearForm();
-            setDataToEdit(null); // Turn off Edit Mode
-          }
-        });
-      } else {
-        // now if all good and not duplicate the send data post method
-        try {
-          const response = await fetch("http://localhost:8000/collegestudent", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(values),
-          });
-          if (response.ok) {
-            console.log("Success data added to server", values);
-            alert("Form Submitted Successfully");
-            clearForm();
-          } else {
-            alert("Error in form submission");
-          }
-        } catch (error) {
-          console.error("Error during form submission:", error);
-          alert(
-            "An error occurred during form submission. Please try again later.",
-          );
-        }
+      if (Object.keys(serverErrors).length > 0) {
+        setError(serverErrors);
+        alert("Duplicate Data Found");
+        return;
       }
+
+      if(datatoedit){
+        await db.student.update(datatoedit.id , values);
+        alert("updated succesfully");
+        setDataToEdit(null)
+      }else{
+        await db.student.add(values);
+        alert("succesfully data submitted ")
+      }
+       clearForm();
+      
+
+
     } catch (error) {
-      console.log(" found  errror ", error);
+       console.error("db errro " , error )
+       alert("faile to save data ")
     }
   };
 
