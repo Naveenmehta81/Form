@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.4",
     "dexie": "^4.3.0",
@@ -17,8 +18,12 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-phone-input-2": "^2.15.1",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.13.0",
     "react-select": "^5.10.2",
-    "tailwindcss": "^4.1.18"
+    "redux": "^5.0.1",
+    "tailwindcss": "^4.1.18",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

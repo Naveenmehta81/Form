@@ -34,3 +34,14 @@ npm install dexie-react-hooks
 
 
 
+// use redux , add authentication using jwt , uudt library 
+
+     in dexie indexdb we crete two table is one is authentication one is where we add data 
+
+     // for authentication slice -> reducer 
+      
+      
+
+
+
+

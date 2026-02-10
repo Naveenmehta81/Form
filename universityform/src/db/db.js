@@ -8,7 +8,8 @@ const db = new Dexie("collegedatabase");
 // ++id  means auot increament like 1 , 2, 3, 4 ,5 ...
 
 db.version(1).stores({
-  student: "++id , firstname , lastname , email , phone",
+  student: "++id , firstname , lastname , email , phone",  // data store 
+  users : "++id , firstname , email "    // for  athutentication 
 });
 
 // whta we make in this
