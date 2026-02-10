@@ -390,7 +390,6 @@ label {
   font-size: 14px;
 }
 
-
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -406,4 +405,3 @@ label {
   animation: slideDown 0.3s ease-out forwards;
   width: 100%;
 }
-

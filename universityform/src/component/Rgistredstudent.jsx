@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import './Table.css' ;
+import "./Table.css";
 
 const Rgistredstudent = ({ resgisteredData, onEdit, deletestudentdata }) => {
   // const [currentpage, setCurrentpage] = useState(1);

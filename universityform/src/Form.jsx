@@ -226,7 +226,7 @@ const Form = () => {
     }
   }, [datatoedit, setValues]);
 
-  // --- UI HANDLERS (Dropdowns, Search, Phone) ---
+
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
   };
@@ -237,7 +237,7 @@ const Form = () => {
     setSearchTerm(value);
 
     setValues((prev) => ({ ...prev, ugccollege: "" })); // Clear selected college when search term changes
-  };
+  };   
 
   useEffect(() => {
     if (debouncedSearch.trim().length > 0) {
@@ -779,7 +779,7 @@ const Form = () => {
                     onChange={handleSearchTermChange}
                   />
                 </div>
-                <ul>
+                <ul>  
                   {mathing &&
                     mathing.map((item, index) => {
                       return (

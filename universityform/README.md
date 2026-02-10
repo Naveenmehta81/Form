@@ -10,3 +10,27 @@
          POST /users - This creates a new user.
          PUT /users/:id - This updates a user based on a specified id.
          DELETE /users/:id - This deletes a user based on the specified id.
+
+
+
+// Here in main branch we use json server so if we need to rund this code then use json server 
+    now i crete a one branche all indexDB using dexie so use this concept to run 
+
+
+
+
+
+How you should learn Dexie (proper intern path)
+
+1️⃣ Basic CRUD
+2️⃣ Use it with React hooks
+3️⃣ Cache API response
+4️⃣ Offline form submission
+5️⃣ Sync Dexie → API when online
+
+lets start -
+npm install dexie
+npm install dexie-react-hooks
+
+
+
