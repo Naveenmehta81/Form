@@ -1,0 +1,144 @@
+/* --- GLOBAL RESET --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f0f2f5; /* Light Grey Background */
+  color: #333;
+}
+
+/* --- LAYOUT CONTAINERS --- */
+.form-container {
+  height: 100%;
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+/* --- HEADER STYLES (New) --- */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+   height: 100%;
+  padding: 15px 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Soft Shadow */
+  margin-bottom: 25px;
+
+  border-left: 5px solid #4a90e2; /* Blue accent line */
+}
+
+.app-header h2 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+}
+
+.user-info {
+  font-size: 0.9rem;
+  color: #666;
+  margin-right: 15px;
+}
+
+/* --- BUTTONS --- */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Logout Button (Red) */
+.logout-btn {
+  background-color: #ff4757;
+  color: white;
+}
+
+.logout-btn:hover {
+  background-color: #ff6b81;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(255, 71, 87, 0.4);
+}
+
+/* Submit Button (Blue) */
+.submit-btn {
+  background-color: #4a90e2;
+  color: white;
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
+.submit-btn:hover {
+  background-color: #357abd;
+}
+
+/* --- FORM BOX --- */
+.form-box {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.form-box h1 {
+  text-align: center;
+  color: #4a90e2;
+  margin-bottom: 10px;
+}
+
+.form-box h2 {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  color: #7f8c8d;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* --- INPUTS & ROWS --- */
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+/* Make inputs stack on mobile */
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+/* --- ERROR TEXT --- */
+.error-text {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}

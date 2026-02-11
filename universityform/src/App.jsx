@@ -1,13 +1,31 @@
 import { useState } from "react";
 import React from "react";
 import Form from "./Form.jsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./pages/Loginpage.jsx";
+import Register from "./pages/registration.jsx";
+import ProtectedRoute from "./Authentication/ProtectedRoute.jsx";
 
 import "./App.css";
 
 function App() {
   return (
     <>
-      <Form />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />|
+          <Route path="/register" element={<Register />} />
+          {/* here we use protected route */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Form />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }

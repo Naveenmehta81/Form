@@ -19,6 +19,7 @@
 .form-container {
   min-height: 100vh;
   width: 100%;
+     
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -28,6 +29,8 @@
 
 .form-box {
   background-color: var(--card-bg);
+  margin-top: 2%;
+  margin-bottom: 2%;
   width: 200%;
   max-width: 950px;
   border-radius: 10px;
@@ -389,6 +392,38 @@ label {
   color: #888;
   font-size: 14px;
 }
+
+.logout-btn {
+  background-color: transparent;
+  color: #ff4757;
+  border: 2px solid #ff4757;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+  margin: 2%;
+  
+}
+
+.logout-btn:hover {
+  background-color: #ff4757;
+  color: white;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between; 
+  align-items: start;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+
+
 
 @keyframes slideDown {
   from {

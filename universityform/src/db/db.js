@@ -9,7 +9,7 @@ const db = new Dexie("collegedatabase");
 
 db.version(1).stores({
   student: "++id , firstname , lastname , email , phone",  // data store 
-  users : "++id , firstname , email "    // for  athutentication 
+  users : "++id , email , password  ,name"    // for  athutentication 
 });
 
 // whta we make in this

@@ -1,23 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import db from "../db/db"; // Import your Dexie DB
-import { v4 as uuidv4 } from "uuid"; // Random ID generator
+import db from "../db/db"; // import data or api
+import { v4 as uuidv4 } from "uuid"; // it give us random twt token
 
-// --- 1. REGISTER ACTION ---
 export const registerUser = createAsyncThunk(
   "auth/register",
   async ({ email, password, name }, { rejectWithValue }) => {
     try {
-      // Check if user already exists
       const existingUser = await db.users.where("email").equals(email).first();
       if (existingUser) {
         return rejectWithValue("User already exists!");
       }
 
-      // Save new user to Dexie
       const newUser = { email, password, name };
       await db.users.add(newUser);
 
-      // Generate Fake Token
+      // Generate Fake Token with new users
       const token = uuidv4();
       localStorage.setItem("token", token);
 
@@ -28,30 +25,28 @@ export const registerUser = createAsyncThunk(
   },
 );
 
-// --- 2. LOGIN ACTION ---
+// login
 export const loginUser = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      // Find user in Dexie
       const user = await db.users.where("email").equals(email).first();
 
       if (!user || user.password !== password) {
         return rejectWithValue("Invalid Email or Password");
       }
 
-      // Generate Fake Token
       const token = uuidv4();
       localStorage.setItem("token", token);
 
       return { user, token };
     } catch (error) {
-      return rejectWithValue("Login failed");
+      return rejectWithValue("Login failed", error);
     }
   },
 );
 
-// --- 3. AUTH SLICE ---
+  // this our slice - reducer + action + state 
 const authSlice = createSlice({
   name: "auth",
   initialState: {

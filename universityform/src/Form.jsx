@@ -16,6 +16,9 @@ import useDebounce from "./Customhook/useDebounce"; // debounce hook
 import Rgistredstudent from "./component/Rgistredstudent";
 import db from "./db/db.js";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "./Authentication/authdataSlice.jsx";
 
 const validation = (values) => {
   let errror = {};
@@ -183,8 +186,6 @@ const Form = () => {
     validation,
   );
 
-
-
   const [isDialCodeOpen, setIsDialCodeOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [mathing, setMatching] = useState([]);
@@ -192,32 +193,21 @@ const Form = () => {
   const debouncedSearch = useDebounce(searchTerm, 1000);
   // const [resgisteredData, setRegisteredData] = useState([]);
   const [datatoedit, setDataToEdit] = useState(null);
- 
 
   const resgisteredData = useLiveQuery(() => db.student.toArray(), []);
-  
- 
-
-
-
-
-
 
   // --- 2. DELETE FUNCTION (DEXIE) ---
   const deletestudentdata = async (id) => {
-    if(window.confirm("Are you sure you want to delete?")){
+    if (window.confirm("Are you sure you want to delete?")) {
       await db.student.delete(id);
-      
     }
   };
-
 
   // --- 3. EDIT HANDLER ---
   const handleEdit = (student) => {
     setDataToEdit(student);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
 
   // Populate form when editing
   useEffect(() => {
@@ -226,18 +216,16 @@ const Form = () => {
     }
   }, [datatoedit, setValues]);
 
-
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
   };
- 
 
   const handleSearchTermChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
 
     setValues((prev) => ({ ...prev, ugccollege: "" })); // Clear selected college when search term changes
-  };   
+  };
 
   useEffect(() => {
     if (debouncedSearch.trim().length > 0) {
@@ -313,19 +301,23 @@ const Form = () => {
     }
 
     try {
-      const existingemail = await db.student.
-      where("email").equals(values.email).toArray();
+      const existingemail = await db.student
+        .where("email")
+        .equals(values.email)
+        .toArray();
 
-      const existphonenumber = await db.student.
-      where("phone").equals(values.phone).toArray();
-      
+      const existphonenumber = await db.student
+        .where("phone")
+        .equals(values.phone)
+        .toArray();
+
       let serverErrors = {};
 
       const emailTaken = existingemail.some((user) =>
-        datatoedit ? user.id !== datatoedit.id : true
+        datatoedit ? user.id !== datatoedit.id : true,
       );
       const phoneTaken = existphonenumber.some((user) =>
-        datatoedit ? user.id !== datatoedit.id : true
+        datatoedit ? user.id !== datatoedit.id : true,
       );
 
       if (existingemail.length > 0 && emailTaken) {
@@ -341,21 +333,18 @@ const Form = () => {
         return;
       }
 
-      if(datatoedit){
-        await db.student.update(datatoedit.id , values);
+      if (datatoedit) {
+        await db.student.update(datatoedit.id, values);
         alert("updated succesfully");
-        setDataToEdit(null)
-      }else{
+        setDataToEdit(null);
+      } else {
         await db.student.add(values);
-        alert("succesfully data submitted ")
+        alert("succesfully data submitted ");
       }
-       clearForm();
-      
-
-
+      clearForm();
     } catch (error) {
-       console.error("db errro " , error )
-       alert("faile to save data ")
+      console.error("db errro ", error);
+      alert("faile to save data ");
     }
   };
 
@@ -406,412 +395,426 @@ const Form = () => {
   //   }
   // };
 
+  const dispatch = useDispatch();
+  const navigation = useNavigate();
+
+  const handleLougout = () => {
+    dispatch(logout());
+    navigation("/");
+  };
+
   return (
-    <div className="form-container">
-      <div className="form-box">
-        <h1>College Form</h1>
-        <div className="from-data">
-          <h2>Fill this details</h2>
+    <>
+      <div className="header-container">
+        <button className="logout-btn" onClick={handleLougout}>
+          Logout
+        </button>
+      </div>
+      <div className="form-container">
+        <div className="form-box">
+          <h1>College Form</h1>
+          <div className="from-data">
+            <h2>Fill this details</h2>
 
-          <form className="from-field" onSubmit={handleSubmit}>
-            {/* name section firstname , lastname  space not include  */}
-            <div className="form-row">
+            <form className="from-field" onSubmit={handleSubmit}>
+              {/* name section firstname , lastname  space not include  */}
+              <div className="form-row">
+                <InputField
+                  label="Firstname Name "
+                  placeholder="enter your first name "
+                  name="firstname"
+                  value={values.firstname}
+                  onChange={handleChange}
+                  error={error.firstname}
+                />
+
+                <InputField
+                  label=" Last Name "
+                  placeholder="enter your last name "
+                  name="lastname"
+                  value={values.lastname}
+                  onChange={handleChange}
+                  error={error.lastname}
+                />
+              </div>
+              {/* name section father name space include  */}
+              <div className="form-row">
+                <InputField
+                  label="Father Name"
+                  placeholder="enter your father name "
+                  name="fathername"
+                  value={values.fathername}
+                  onChange={handleChange}
+                  error={error.fathername}
+                />
+              </div>
+
+              {/* email setction  */}
+
               <InputField
-                label="Firstname Name "
-                placeholder="enter your first name "
-                name="firstname"
-                value={values.firstname}
+                label="Email"
+                placeholder="xyz@gmail.com"
+                name="email"
                 onChange={handleChange}
-                error={error.firstname}
-              />
-
-              <InputField
-                label=" Last Name "
-                placeholder="enter your last name "
-                name="lastname"
-                value={values.lastname}
-                onChange={handleChange}
-                error={error.lastname}
-              />
-            </div>
-            {/* name section father name space include  */}
-            <div className="form-row">
-              <InputField
-                label="Father Name"
-                placeholder="enter your father name "
-                name="fathername"
-                value={values.fathername}
-                onChange={handleChange}
-                error={error.fathername}
-              />
-            </div>
-
-            {/* email setction  */}
-
-            <InputField
-              label="Email"
-              placeholder="xyz@gmail.com"
-              name="email"
-              onChange={handleChange}
-              value={values.email}
-              error={error.email}
-              onBlur={handleblur}
-            />
-
-            {/* dob section  */}
-            <div className="form-row">
-              <InputField
-                label="Date of Birth"
-                type="date"
-                name="dob"
-                onChange={handleChange}
-                value={values.dob}
-                error={error.dob}
+                value={values.email}
+                error={error.email}
                 onBlur={handleblur}
               />
 
-              {/* gender section  */}
-              <Radiogroup
-                label="gender"
-                name="gender"
-                onChange={handleChange}
-                value={values.gender}
-                error={error.gender}
-                options={["male", "female", "other"]}
-              />
-            </div>
+              {/* dob section  */}
+              <div className="form-row">
+                <InputField
+                  label="Date of Birth"
+                  type="date"
+                  name="dob"
+                  onChange={handleChange}
+                  value={values.dob}
+                  error={error.dob}
+                  onBlur={handleblur}
+                />
 
-            {/* address and pin section  */}
-            <div className="form-row">
-              <InputField
-                label=" Adress:"
-                placeholder="enter your addres"
-                name="address"
-                onChange={handleChange}
-                value={values.address}
-                error={error.address}
-              />
-              <InputField
-                label="PIN CODE:"
-                placeholder="PINCODE"
-                name="pin"
-                onChange={handleChange}
-                value={values.pin}
-                error={error.pin}
-                pattern="[0-9]{6}"
-                maxLength={6}
-              />
-            </div>
+                {/* gender section  */}
+                <Radiogroup
+                  label="gender"
+                  name="gender"
+                  onChange={handleChange}
+                  value={values.gender}
+                  error={error.gender}
+                  options={["male", "female", "other"]}
+                />
+              </div>
 
-            {/* phone number section  */}
+              {/* address and pin section  */}
+              <div className="form-row">
+                <InputField
+                  label=" Adress:"
+                  placeholder="enter your addres"
+                  name="address"
+                  onChange={handleChange}
+                  value={values.address}
+                  error={error.address}
+                />
+                <InputField
+                  label="PIN CODE:"
+                  placeholder="PINCODE"
+                  name="pin"
+                  onChange={handleChange}
+                  value={values.pin}
+                  error={error.pin}
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                />
+              </div>
 
-            <div
-              className="form-row"
-              style={{ zIndex: isDialCodeOpen ? 100 : 1 }}
-            >
-              <div className="form-group">
-                <label>Phone Number</label>
+              {/* phone number section  */}
 
-                <div className="phone-wrapper">
-                  {/* 1. Dropdown Section */}
-                  <div className="custom-select-container phone-dialcode">
-                    <div
-                      className="select-trigger"
-                      onClick={() => setIsDialCodeOpen(!isDialCodeOpen)}
-                    >
-                      {(() => {
-                        const selectedCountry = PhoneData.find(
-                          (item) =>
-                            item.dial_code === (values.dialcode || "+91"),
-                        );
-                        return (
-                          <span
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "5px",
-                            }}
-                          >
-                            <span>{selectedCountry?.flag}</span>
-                            {/* <span>{values.dialcode || "+91"}</span> */}
-                          </span>
-                        );
-                      })()}
+              <div
+                className="form-row"
+                style={{ zIndex: isDialCodeOpen ? 100 : 1 }}
+              >
+                <div className="form-group">
+                  <label>Phone Number</label>
 
-                      {isDialCodeOpen && (
-                        <div className="options-list">
-                          {PhoneData.map((item) => (
-                            <div
-                              key={item.code}
-                              className="option-item"
-                              onClick={() => {
-                                handleDialCode(item.dial_code);
+                  <div className="phone-wrapper">
+                    {/* 1. Dropdown Section */}
+                    <div className="custom-select-container phone-dialcode">
+                      <div
+                        className="select-trigger"
+                        onClick={() => setIsDialCodeOpen(!isDialCodeOpen)}
+                      >
+                        {(() => {
+                          const selectedCountry = PhoneData.find(
+                            (item) =>
+                              item.dial_code === (values.dialcode || "+91"),
+                          );
+                          return (
+                            <span
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
                               }}
                             >
-                              {item.flag}
-                              {item.dial_code}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                              <span>{selectedCountry?.flag}</span>
+                              {/* <span>{values.dialcode || "+91"}</span> */}
+                            </span>
+                          );
+                        })()}
+
+                        {isDialCodeOpen && (
+                          <div className="options-list">
+                            {PhoneData.map((item) => (
+                              <div
+                                key={item.code}
+                                className="option-item"
+                                onClick={() => {
+                                  handleDialCode(item.dial_code);
+                                }}
+                              >
+                                {item.flag}
+                                {item.dial_code}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 2. Input Section */}
+                    <div className="phone-input-box">
+                      <InputField
+                        name="phone"
+                        placeholder="Enter phone number"
+                        value={values.phone}
+                        onBlur={handleblur}
+                        onChange={handlephoneinput}
+                        error={error.phone}
+                      />
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* 2. Input Section */}
-                  <div className="phone-input-box">
-                    <InputField
-                      name="phone"
-                      placeholder="Enter phone number"
-                      value={values.phone}
-                      onBlur={handleblur}
-                      onChange={handlephoneinput}
-                      error={error.phone}
+              {/* documetn section  */}
+
+              <div className="form-row">
+                <Checkbox
+                  legend="documetn provide"
+                  value={values}
+                  onChange={handleChange}
+                  option={[
+                    { name: "marksheet10", label: "10th Marksheet" },
+                    { name: "marksheet12", label: "12th Marksheet" },
+                    { name: "BCA", label: "BCA Degree" },
+                    { name: "MCA", label: "MCA Degree" },
+                  ]}
+                />
+              </div>
+
+              {/* text area about and gap year  */}
+              <label>
+                About Yourself:
+                <div className="form-row">
+                  <Textarea
+                    name="about"
+                    value={values.about}
+                    onChange={handleChange}
+                    onBlur={handleblur}
+                    placeholder="Tell us about yourself..."
+                    maxChar={200}
+                    error={error.about}
+                  />
+                </div>
+              </label>
+
+              <label>
+                Gap Year Explanation:
+                <div className="form-row">
+                  <Textarea
+                    name="gap"
+                    value={values.gap}
+                    onChange={handleChange}
+                    onBlur={handleblur}
+                    placeholder="Explain your gap year (if any)..."
+                    maxChar={200}
+                    error={error.gap}
+                  />
+                </div>
+              </label>
+
+              {/* radio nationality and state  */}
+
+              <div
+                className={`form-row ${openDropdown === "country" ? "active-row" : ""}`}
+              >
+                <Radiogroup
+                  label="Nationality"
+                  name="nation"
+                  value={values.nation}
+                  onChange={handleChange}
+                  error={error.nation}
+                  options={["India", "Nepal", "other"]}
+                />
+
+                {values.nation === "other" && (
+                  <div className="fade-in-field" style={{ flex: 1 }}>
+                    <SelectGroup
+                      label="Country if other "
+                      name="country"
+                      value={values.country}
+                      onChange={handleChange}
+                      options={Countries}
+                      placeholder="Select Country"
+                      // error={error.country}
+                      // 3. PASS CONTROL PROPS
+                      isOpen={openDropdown === "country"} // Is this one open?
+                      onToggle={() => toggleDropdown("country")} // Function to click
                     />
                   </div>
-                </div>
+                )}
               </div>
-            </div>
 
-            {/* documetn section  */}
-
-            <div className="form-row">
-              <Checkbox
-                legend="documetn provide"
-                value={values}
-                onChange={handleChange}
-                option={[
-                  { name: "marksheet10", label: "10th Marksheet" },
-                  { name: "marksheet12", label: "12th Marksheet" },
-                  { name: "BCA", label: "BCA Degree" },
-                  { name: "MCA", label: "MCA Degree" },
-                ]}
-              />
-            </div>
-
-            {/* text area about and gap year  */}
-            <label>
-              About Yourself:
-              <div className="form-row">
-                <Textarea
-                  name="about"
-                  value={values.about}
+              <div
+                className={`form-row ${openDropdown === "state" ? "active-row" : ""}`}
+              >
+                <Radiogroup
+                  label="state"
+                  name="state_mode"
+                  value={values.state_mode}
                   onChange={handleChange}
-                  onBlur={handleblur}
-                  placeholder="Tell us about yourself..."
-                  maxChar={200}
-                  error={error.about}
+                  error={error.state_mode}
+                  options={["MP", "other"]}
+                />
+
+                {/*  state section  */}
+                {values.state_mode === "other" && (
+                  <div className="fade-in-field" style={{ flex: 1 }}>
+                    <SelectGroup
+                      label="choose state if other :"
+                      name="state"
+                      value={values.state}
+                      onChange={handleChange}
+                      options={States}
+                      placeholder="Select State"
+                      // error={error.state}
+                      isOpen={openDropdown === "state"}
+                      onToggle={() => toggleDropdown("state")}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div
+                className={`form-row ${openDropdown === "courses" ? "active-row" : ""}`}
+              >
+                {/* 2. Course Select */}
+                <SelectGroup
+                  label="Courses"
+                  name="courses"
+                  value={values.courses}
+                  onChange={handleChange}
+                  options={courses}
+                  placeholder="Select Course"
+                  error={error.courses}
+                  isOpen={openDropdown === "courses"}
+                  onToggle={() => toggleDropdown("courses")}
                 />
               </div>
-            </label>
 
-            <label>
-              Gap Year Explanation:
-              <div className="form-row">
-                <Textarea
-                  name="gap"
-                  value={values.gap}
-                  onChange={handleChange}
-                  onBlur={handleblur}
-                  placeholder="Explain your gap year (if any)..."
-                  maxChar={200}
-                  error={error.gap}
-                />
-              </div>
-            </label>
-
-            {/* radio nationality and state  */}
-
-            <div
-              className={`form-row ${openDropdown === "country" ? "active-row" : ""}`}
-            >
-              <Radiogroup
-                label="Nationality"
-                name="nation"
-                value={values.nation}
-                onChange={handleChange}
-                error={error.nation}
-                options={["India", "Nepal", "other"]}
-              />
-
-              {values.nation === "other" && (
-                <div className="fade-in-field" style={{ flex: 1 }}>
-                  <SelectGroup
-                    label="Country if other "
-                    name="country"
-                    value={values.country}
+              {/* college name section  */}
+              <label>
+                Enter your coollege name-
+                <div className="form-row">
+                  <InputField
+                    label=" BCA "
+                    name="bcacollgename"
+                    value={values.bcacollgename}
+                    placeholder="Enter Your college Name:"
+                    error={error.bcacollgename}
                     onChange={handleChange}
-                    options={Countries}
-                    placeholder="Select Country"
-                    // error={error.country}
-                    // 3. PASS CONTROL PROPS
-                    isOpen={openDropdown === "country"} // Is this one open?
-                    onToggle={() => toggleDropdown("country")} // Function to click
                   />
                 </div>
-              )}
-            </div>
-
-            <div
-              className={`form-row ${openDropdown === "state" ? "active-row" : ""}`}
-            >
-              <Radiogroup
-                label="state"
-                name="state_mode"
-                value={values.state_mode}
-                onChange={handleChange}
-                error={error.state_mode}
-                options={["MP", "other"]}
-              />
-
-              {/*  state section  */}
-              {values.state_mode === "other" && (
-                <div className="fade-in-field" style={{ flex: 1 }}>
-                  <SelectGroup
-                    label="choose state if other :"
-                    name="state"
-                    value={values.state}
+                <div className="form-row">
+                  <InputField
+                    label=" MCA "
+                    name="mcacollgename"
+                    value={values.mcacollgename}
+                    placeholder="Enter Your college Name:"
+                    error={error.mcacollgename}
                     onChange={handleChange}
-                    options={States}
-                    placeholder="Select State"
-                    // error={error.state}
-                    isOpen={openDropdown === "state"}
-                    onToggle={() => toggleDropdown("state")}
                   />
                 </div>
-              )}
-            </div>
-
-            <div
-              className={`form-row ${openDropdown === "courses" ? "active-row" : ""}`}
-            >
-              {/* 2. Course Select */}
-              <SelectGroup
-                label="Courses"
-                name="courses"
-                value={values.courses}
-                onChange={handleChange}
-                options={courses}
-                placeholder="Select Course"
-                error={error.courses}
-                isOpen={openDropdown === "courses"}
-                onToggle={() => toggleDropdown("courses")}
-              />
-            </div>
-
-            {/* college name section  */}
-            <label>
-              Enter your coollege name-
-              <div className="form-row">
-                <InputField
-                  label=" BCA "
-                  name="bcacollgename"
-                  value={values.bcacollgename}
-                  placeholder="Enter Your college Name:"
-                  error={error.bcacollgename}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="form-row">
-                <InputField
-                  label=" MCA "
-                  name="mcacollgename"
-                  value={values.mcacollgename}
-                  placeholder="Enter Your college Name:"
-                  error={error.mcacollgename}
-                  onChange={handleChange}
-                />
-              </div>
-            </label>
-
-            <div className="form-group">
-              <label>Grade:</label>
-
-              <div className="grade-container">
-                <input
-                  className="gardelist"
-                  list="grade-list"
-                  name="gradebca"
-                  value={values.gradebca}
-                  onChange={handleChange}
-                  error={error.gradebca}
-                  placeholder="Enter a Grade  BCA:"
-                />
-
-                <datalist id="grade-list">
-                  <option>+A</option>
-                  <option>A</option>
-                  <option>+B</option>
-                  <option>B</option>
-                  <option>C</option>
-                  <option>D</option>
-                  <option>F</option>
-                </datalist>
-
-                <input
-                  className="gardelist"
-                  list="grade-list"
-                  name="grademca"
-                  value={values.grademca}
-                  onChange={handleChange}
-                  error={error.grademca}
-                  placeholder="Enter a Grade MCA:"
-                />
-
-                <datalist id="grade-list">
-                  <option>+A</option>
-                  <option>A</option>
-                  <option>+B</option>
-                  <option>B</option>
-                  <option>C</option>
-                  <option>D</option>
-                  <option>F</option>
-                </datalist>
-              </div>
+              </label>
 
               <div className="form-group">
-                <label>UGC Approved College Search:</label>
-                <div className="form-row">
+                <label>Grade:</label>
+
+                <div className="grade-container">
                   <input
-                    type="text"
-                    placeholder="search bar.."
-                    name="ugccollege"
-                    value={searchTerm}
-                    onChange={handleSearchTermChange}
+                    className="gardelist"
+                    list="grade-list"
+                    name="gradebca"
+                    value={values.gradebca}
+                    onChange={handleChange}
+                    error={error.gradebca}
+                    placeholder="Enter a Grade  BCA:"
                   />
+
+                  <datalist id="grade-list">
+                    <option>+A</option>
+                    <option>A</option>
+                    <option>+B</option>
+                    <option>B</option>
+                    <option>C</option>
+                    <option>D</option>
+                    <option>F</option>
+                  </datalist>
+
+                  <input
+                    className="gardelist"
+                    list="grade-list"
+                    name="grademca"
+                    value={values.grademca}
+                    onChange={handleChange}
+                    error={error.grademca}
+                    placeholder="Enter a Grade MCA:"
+                  />
+
+                  <datalist id="grade-list">
+                    <option>+A</option>
+                    <option>A</option>
+                    <option>+B</option>
+                    <option>B</option>
+                    <option>C</option>
+                    <option>D</option>
+                    <option>F</option>
+                  </datalist>
                 </div>
-                <ul>  
-                  {mathing &&
-                    mathing.map((item, index) => {
-                      return (
-                        <li
-                          key={index}
-                          onClick={() => {
-                            setSearchTerm(item.collegeName); //ubdate ui search bar
 
-                            setValues({
-                              // update form data
-                              ...values,
-                              ugccollege: item.collegeName,
-                            });
+                <div className="form-group">
+                  <label>UGC Approved College Search:</label>
+                  <div className="form-row">
+                    <input
+                      type="text"
+                      placeholder="search bar.."
+                      name="ugccollege"
+                      value={searchTerm}
+                      onChange={handleSearchTermChange}
+                    />
+                  </div>
+                  <ul>
+                    {mathing &&
+                      mathing.map((item, index) => {
+                        return (
+                          <li
+                            key={index}
+                            onClick={() => {
+                              setSearchTerm(item.collegeName); //ubdate ui search bar
 
-                            setMatching([]); // close dropdown
-                          }}
-                          className={
-                            searchTerm === item.collegeName ? "selected" : ""
-                          }
-                        >
-                          {item.collegeName}
-                        </li>
-                      );
-                    })}
-                </ul>
+                              setValues({
+                                // update form data
+                                ...values,
+                                ugccollege: item.collegeName,
+                              });
+
+                              setMatching([]); // close dropdown
+                            }}
+                            className={
+                              searchTerm === item.collegeName ? "selected" : ""
+                            }
+                          >
+                            {item.collegeName}
+                          </li>
+                        );
+                      })}
+                  </ul>
+                </div>
               </div>
-            </div>
-            <button type="submit" className="submit-btn">
-              Submit
-            </button>
-          </form>
-
+              <button type="submit" className="submit-btn">
+                Submit
+              </button>
+            </form>
+          </div>
           <section className="table-section">
             <Rgistredstudent
               resgisteredData={resgisteredData}
@@ -821,7 +824,7 @@ const Form = () => {
           </section>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

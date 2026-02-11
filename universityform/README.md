@@ -38,9 +38,13 @@ npm install dexie-react-hooks
 
      in dexie indexdb we crete two table is one is authentication one is where we add data 
 
-     // for authentication slice -> reducer 
-      
-      
+     // first we create a store empty   
+       then wrappe in my app  in store and provider then my whole app are in redux enivorment 
+
+    //       
+
+        
+       
 
 
 
