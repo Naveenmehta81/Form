@@ -7,9 +7,9 @@ const db = new Dexie("collegedatabase");
 // note like Note: You only need to list fields you want to search or filter by
 // ++id  means auot increament like 1 , 2, 3, 4 ,5 ...
 
-db.version(1).stores({
+db.version(2).stores({
   student: "++id , firstname , lastname , email , phone",  // data store 
-  users : "++id , email , password  ,name"    // for  athutentication 
+  users : "++id , email , password  ,name , resettoken"    // for  athutentication 
 });
 
 // whta we make in this

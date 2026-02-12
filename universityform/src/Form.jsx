@@ -19,6 +19,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "./Authentication/authdataSlice.jsx";
+import { useSelector } from "react-redux";
 
 const validation = (values) => {
   let errror = {};
@@ -185,6 +186,20 @@ const Form = () => {
     },
     validation,
   );
+
+  const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user) {
+      setValues((prev) => ({
+        ...prev,
+        firstname: user.name || "",
+
+        email: user.email || "",
+        student: user.id || "",
+      }));
+    }
+  }, [user]);
 
   const [isDialCodeOpen, setIsDialCodeOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
