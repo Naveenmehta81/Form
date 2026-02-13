@@ -7,7 +7,10 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async ({ email, password, name }, { rejectWithValue }) => {
     try {
-      const existingUser = await db.users.where("email").equals(email).first();
+      const existingUser = await db.users
+        .filter((user) => user.email === email)
+        .first();
+
       if (existingUser) {
         // mil gya
         return rejectWithValue("User already exists!");
@@ -21,7 +24,7 @@ export const registerUser = createAsyncThunk(
       };
       const userid = await db.users.add(newUser);
 
-      const safeuser = { id: userid, name, email };
+       const safeuser = { id: userid, name, email };
 
       // Generate Fake Token with new users
       const token = uuidv4();

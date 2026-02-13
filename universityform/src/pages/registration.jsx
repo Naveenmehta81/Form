@@ -17,7 +17,7 @@ const Register = () => {
     dispatch(registerUser({ name, email, password }))
       .unwrap()
       .then(() => {
-        navigate("/login"); // Go to Form on success
+        navigate("/"); // Go to Form on success
       });
   };
 

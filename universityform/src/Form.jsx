@@ -208,8 +208,18 @@ const Form = () => {
   const debouncedSearch = useDebounce(searchTerm, 1000);
   // const [resgisteredData, setRegisteredData] = useState([]);
   const [datatoedit, setDataToEdit] = useState(null);
+  const [cureentuser, setcurrentuser] = useState(null);
 
-  const resgisteredData = useLiveQuery(() => db.student.toArray(), []);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    setcurrentuser(user);
+  }, []);
+
+  const resgisteredData = useLiveQuery(async () => {
+    if (!cureentuser) return [];
+
+    return await db.student.where("userID").equals(cureentuser.id).toArray();
+  }, [cureentuser?.id]);
 
   // --- 2. DELETE FUNCTION (DEXIE) ---
   const deletestudentdata = async (id) => {
@@ -309,6 +319,11 @@ const Form = () => {
     e.preventDefault();
     console.log("sumiited the data ", values);
 
+    if (!cureentuser) {
+      alert("Please login first!");
+      return;
+    }
+
     const validerrors = validation(values);
     if (Object.keys(validerrors).length !== 0) {
       setError(validerrors);
@@ -353,7 +368,11 @@ const Form = () => {
         alert("updated succesfully");
         setDataToEdit(null);
       } else {
-        await db.student.add(values);
+        await db.student.add({
+          ...values,
+
+          userID: cureentuser.id,
+        });
         alert("succesfully data submitted ");
       }
       clearForm();
